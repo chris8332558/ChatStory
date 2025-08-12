@@ -2,7 +2,7 @@
 // connects to the database, and sets up middleware and routes.
 
 const express = require('express');
-const { connectToMongo } = requrie('./config');
+const { connectToMongo } = require('./config');
 const authRoutes = require('./api/authRoutes');
 
 // If the connection fails, the application will exit (as defined in your config/index.js file), 
