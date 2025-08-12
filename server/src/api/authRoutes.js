@@ -17,7 +17,10 @@ router.post('/register', authController.register)
 // You would add login route here as well
 // jwt is almost certainly used in the corresponding 
 // login function (which would also be in this file) to create authentication tokens.
-// router.post('/login', authController.login);
+// @route POST /api/auth/login
+// @desc Authenticate user & get token
+// @access Public
+router.post('/login', authController.login);
 
 
 // This line exports the fully configured router object. 

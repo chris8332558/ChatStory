@@ -22,7 +22,7 @@ const User = {
     // and this function will return undefined, which is the correct behavior.
     async findByEmail(email) {
         const result = await pgPool.query('SELECT * FROM Users WHERE email = $1', [email]);
-        return result.rows[0];
+        return result.rows[0]; // (username, email, password_hash)
     },
 };
 
