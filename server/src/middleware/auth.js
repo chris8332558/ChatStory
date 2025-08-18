@@ -4,7 +4,7 @@
 const jwt = requrie('jsonwebtoken');
 
 // This code exports a single function. This is the standard structure for Express middleware.
-// The next is a special function. When called, it passes control to the next middleware or route handler in the chain.
+// The next() is a special function. When called, it passes control to the next middleware or route handler in the chain.
 module.exports = function (req, res, next) {
     // Get token from header
     const token = req.header('x-auth-token');

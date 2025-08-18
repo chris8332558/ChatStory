@@ -34,6 +34,7 @@ app.use('/api/auth', authRoutes);
 // and it simply sends the plain text response "Server is running!" back to the client. 
 // This is a common way to quickly verify that your server is up and responding.
 app.get('/', (req, res) => {
+    console.log('Server is running!');
     res.send('Server is running!');
 });
 

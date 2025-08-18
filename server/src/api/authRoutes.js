@@ -14,7 +14,6 @@ const authController = require('../controllers/authController');
 // @access Public
 router.post('/register', authController.register)
 
-// You would add login route here as well
 // jwt is almost certainly used in the corresponding 
 // login function (which would also be in this file) to create authentication tokens.
 // @route POST /api/auth/login

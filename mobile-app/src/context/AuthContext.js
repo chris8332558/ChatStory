@@ -4,7 +4,7 @@
 
 import React, { createContext, useState } from 'react';
 
-// Think of this AuthContext as the address where the globla auth data will live.
+// Think of this AuthContext as the address where the global auth data will live.
 const AuthContext = createContext();
 
 // Inside the AuthProvider, useState is used to create two important pieces of state:

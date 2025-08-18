@@ -41,12 +41,12 @@ exports.register = async (req, res) => {
 };
 
 
-// Login: Find the user by emila, compare the password, and if they match, generate a JWT.
+// Login: Find the user by email, compare the password, and if they match, generate a JWT.
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
         if ( !email || ! password ) {
-            return res.status(400).json({ message: 'Pleasw provide email and password' });
+            return res.status(400).json({ message: 'Please provide email and password' });
         }
 
         // 1. Find user in the database
