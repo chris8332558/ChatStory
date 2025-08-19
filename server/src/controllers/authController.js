@@ -48,18 +48,21 @@ exports.login = async (req, res) => {
         if ( !email || ! password ) {
             return res.status(400).json({ message: 'Please provide email and password' });
         }
+        console.log(`authController: get email: ${email} and password: ${password}`)
 
         // 1. Find user in the database
+        console.log('authController: Try to find user by email')
         const user = await User.findByEmail(email);
         if (!user) { 
             // Use a generic message for securiity
-            return res.status(401).json({ message: 'Invalid credentials' });
+            return res.status(401).json({ message: 'Invalid credentials (findByEmail)' });
         }
+        console.log('authController: Found user by email')
 
         // 2. Compare the provided email with the stored hash
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
-            return res.status(401). json({ message: 'Invalid credentials' })
+            return res.status(401). json({ message: 'Invalid credentials (bcrypt.compare)' })
         }
 
         // 3. Create a JWT payload
