@@ -10,7 +10,7 @@ import * as SecureStore from 'expo-secure-store';
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login } = useContext(AuthContext);
+    const { login, isLoading } = useContext(AuthContext);
 
     // Triggered when the Login button is pressed
     const handleLogin = async () => {
@@ -19,19 +19,11 @@ export default function LoginScreen() {
             return;
         }
 
-        // We will implement the login API call later
         try {
+            // AuthContext.login does the API call, token storage, and state updates
             await login(email, password);
-            // the redirect will happen automatically via the root index file
-            console.log('handleLogin::apiClient.post()');
-            const response = await apiClient.post('/auth/login', { email, password }); // from authController
-            console.log('Get response');
-            const { token } = response.data;
-
+            // Navigation to the home page will happen automatically via the root index file reading userToken
             console.log("Log in with:", email, password);
-            // Securely store the token
-            await SecureStore.setItemAsync('userToken', token);
-            
         } catch(err) {
             console.error(err);
             Alert.alert('Login Failed', 'Invalid credentials. Please try again (handleLogin)');
@@ -55,9 +47,11 @@ export default function LoginScreen() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry // A prop used on the password field to obscure the text with dots.
+            autoCorrect={false}
+            textContentType="password"
             />
 
-            <Button title="Login" onPress={handleLogin} />
+            <Button title={isLoading ? "Please wait..." : "Login"} onPress={handleLogin} disabled={isLoading} />
             <Link href='/register' style={styles.link}>Do not have an account? Sign up</Link>
         </View>
     );

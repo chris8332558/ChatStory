@@ -18,7 +18,7 @@ export default function StartPage() {
             </View>
         );
     }
-        */
+    */
 
     if (userToken) {
         // User is singed in, redirect to the home page
