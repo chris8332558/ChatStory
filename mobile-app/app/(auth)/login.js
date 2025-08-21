@@ -58,7 +58,7 @@ export default function LoginScreen() {
             />
 
             <Button title="Login" onPress={handleLogin} />
-            <Link href='/login' style={styles.link}>Do not have an account? Sign up</Link>
+            <Link href='/register' style={styles.link}>Do not have an account? Sign up</Link>
         </View>
     );
 };

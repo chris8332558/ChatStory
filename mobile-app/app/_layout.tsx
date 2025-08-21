@@ -13,14 +13,14 @@
 
 import React from "react";
 import { AuthProvider } from '../src/context/AuthContext';
-import { Slot } from 'expo-router';
+import { Stack, Slot } from 'expo-router';
 
 // The <Slot /> component renders the current child route. Expo Router will handle switching 
 // between the (auth) and (tabs) groups based on the logic in our index.js file.
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <Slot/>
+      <Slot />
     </AuthProvider>
   );
 };

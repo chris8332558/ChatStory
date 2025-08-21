@@ -10,6 +10,7 @@ import { View, StyleSheet, ActivityIndicator } from "react-native";
 export default function StartPage() {
     const { userToken, isLoading } = useContext(AuthContext);
 
+    /*
     if (isLoading) {
         return (
             <View style={styles.loading}>
@@ -17,6 +18,7 @@ export default function StartPage() {
             </View>
         );
     }
+        */
 
     if (userToken) {
         // User is singed in, redirect to the home page
