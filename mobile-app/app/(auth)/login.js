@@ -23,7 +23,7 @@ export default function LoginScreen() {
             // AuthContext.login does the API call, token storage, and state updates
             await login(email, password);
             // Navigation to the home page will happen automatically via the root index file reading userToken
-            console.log("Log in with:", email, password);
+            console.log("login: Log in with:", email, password);
         } catch(err) {
             console.error(err);
             Alert.alert('Login Failed', 'Invalid credentials. Please try again (handleLogin)');

@@ -31,13 +31,16 @@ export const AuthProvider = ({ children }) => {
     const [userToken, setUserToken] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    useEffect(() => { console.log('AuthContext token changed:', !!userToken); }, [userToken]);
+
     // Load token on app start (restore session)
     useEffect(() => {
         const bootstrapAsync = async () => {
+            console.log('AuthContext: bootstrapAsync');
             try {
                 const storedToken = await SecureStore.getItemAsync(TOEKN_KEY);
                 if (storedToken) {
-                    setUserToken(storedToken);
+                    setUserToken(storedToken); // This should trigger re-render of index.js
                 }
             } catch (err) {
                 console.warn('Failed to restore token', err);
@@ -58,11 +61,13 @@ export const AuthProvider = ({ children }) => {
             const res = await apiClient.post('/auth/login', {email, password});
             const token = res?.data?.token;
             if (!token) {
+                console.log(`AuthContext: error: setUserToken ${token}`)
                 throw new Error('Login response missing token.');
             }
 
             await SecureStore.setItemAsync(TOEKN_KEY, token);
-            setUserToken(token);
+            setUserToken(token); // This should trigger re-render of index.js
+            console.log(`AuthContext.login: Successfully setUserToken`)
         } catch (err) {
             const message = err?.response?.data?.message || err?.message || 'Unable to log in. Please try again.';
             throw new Error(message);

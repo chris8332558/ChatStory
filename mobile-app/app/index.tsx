@@ -7,10 +7,10 @@ import { Redirect } from 'expo-router';
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 
 // Defines the screen component. It receives the navigation prop from React Navigation, which allows it to move to other screens.
-export default function StartPage() {
+export default function Index() {
     const { userToken, isLoading } = useContext(AuthContext);
+    console.log('index: isLoading=', isLoading, 'userToken=', !!userToken)
 
-    /*
     if (isLoading) {
         return (
             <View style={styles.loading}>
@@ -18,13 +18,14 @@ export default function StartPage() {
             </View>
         );
     }
-    */
 
+    // CRITICAL: This redirect should trigger every time userToken changes
     if (userToken) {
         // User is singed in, redirect to the home page
+        console.log('index: has userToken, redirect to home page');
         return <Redirect href="/home" />;
     } else {
-        console.log("Has no userToken, go to login screen");
+        console.log("index: has no userToken, go to login screen");
         return <Redirect href="/login" />;
     }
 }

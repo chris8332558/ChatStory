@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useState, useContext } from "react";
 import { useRouter } from 'expo-router';
 import { View, Button, Text, StyleSheet } from 'react-native';
+import AuthContext from '../../src/context/AuthContext';
 
 export default function HomeScreen() {
     const router = useRouter(); 
+    const { logout, isLoading } = useContext(AuthContext);
 
     const handleLogout = async () => {
+        await logout();
+        console.log('home: logout');
         router.replace('/') // Go to the index.tsx screen
     };
 

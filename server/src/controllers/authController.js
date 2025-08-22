@@ -64,6 +64,7 @@ exports.login = async (req, res) => {
         if (!isMatch) {
             return res.status(401). json({ message: 'Invalid credentials (bcrypt.compare)' })
         }
+        console.log('authController: match bcrypt password hash');
 
         // 3. Create a JWT payload
         // The payload should contain non-sensitive information that helps 
