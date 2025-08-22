@@ -2,6 +2,8 @@
 // In short, do not add App.js in a new Expo Router project—use app/_layout.(tsx) 
 // as the root wrapper and add screens under app/ as routes
 
+// app/_layout.tsx is the root layout file, and is rendered before any other route in the app.
+
 // There are two methods to navigate through screens, you can only choose one to use:
 // 1. Expo Router: A modern, file-based routing system. It uses the structure of your files and 
 // folders inside an app/ directory to automatically create navigators and screens. 

@@ -11,6 +11,7 @@ export default function Index() {
     const { userToken, isLoading } = useContext(AuthContext);
     console.log('index: isLoading=', isLoading, 'userToken=', !!userToken)
 
+    // CRITICAL: Show loading while checking auth state
     if (isLoading) {
         return (
             <View style={styles.loading}>

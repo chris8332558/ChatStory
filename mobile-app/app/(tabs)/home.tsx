@@ -10,7 +10,7 @@ export default function HomeScreen() {
     const handleLogout = async () => {
         await logout();
         console.log('home: logout');
-        router.replace('/') // Go to the index.tsx screen
+        router.replace('/login') // Go to the index.tsx screen
     };
 
     return (

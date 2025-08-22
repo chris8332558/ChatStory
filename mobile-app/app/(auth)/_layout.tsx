@@ -4,10 +4,7 @@ import { Stack } from 'expo-router';
 
 export default function AuthLayout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false, // hide headers for auth screens (optional)
-      }}
-    />
+    // hide headers for auth screens (optional)
+    <Stack screenOptions={{ headerShown: false, }} />
   );
 }

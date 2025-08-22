@@ -12,6 +12,7 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const { login, isLoading } = useContext(AuthContext);
 
+    const router = useRouter();
     // Triggered when the Login button is pressed
     const handleLogin = async () => {
         if (!email || !password) {
@@ -24,6 +25,7 @@ export default function LoginScreen() {
             await login(email, password);
             // Navigation to the home page will happen automatically via the root index file reading userToken
             console.log("login: Log in with:", email, password);
+            router.navigate("/home");
         } catch(err) {
             console.error(err);
             Alert.alert('Login Failed', 'Invalid credentials. Please try again (handleLogin)');
@@ -52,7 +54,7 @@ export default function LoginScreen() {
             />
 
             <Button title={isLoading ? "Please wait..." : "Login"} onPress={handleLogin} disabled={isLoading} />
-            <Link href='/register' style={styles.link}>Do not have an account? Sign up</Link>
+            <Link href="/register" style={styles.link}>Do not have an account? Sign up</Link>
         </View>
     );
 };
