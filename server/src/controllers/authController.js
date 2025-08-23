@@ -82,7 +82,9 @@ exports.login = async (req, res) => {
             process.env.JWT_SECRET, // This is used to create a unique, verifiable signature. 
             { expiresIn: '7d' }, // Token expires in 7 days
             (err, token) => { // callback
-                if (err) throw err;
+                if (err) {
+                    throw err;
+                }
                 res.json({ token }); // Send a token to the client, the client will then store this token and send it with every subsequent request to access protected parts of the API.
             }
         );

@@ -11,15 +11,6 @@ export default function Index() {
     const { userToken, isLoading } = useContext(AuthContext);
     console.log('index: isLoading=', isLoading, 'userToken=', !!userToken)
 
-    // CRITICAL: Show loading while checking auth state
-    if (isLoading) {
-        return (
-            <View style={styles.loading}>
-                <ActivityIndicator size='large' />
-            </View>
-        );
-    }
-
     // CRITICAL: This redirect should trigger every time userToken changes
     if (userToken) {
         // User is singed in, redirect to the home page

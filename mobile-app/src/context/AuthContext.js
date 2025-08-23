@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => { console.log('AuthContext token changed:', !!userToken); }, [userToken]);
+    useEffect(() => { console.log('UserToken now is:', userToken); }, [userToken]);
 
     // Load token on app start (restore session)
     useEffect(() => {
@@ -67,7 +68,7 @@ export const AuthProvider = ({ children }) => {
 
             await SecureStore.setItemAsync(TOEKN_KEY, token);
             setUserToken(token); // This should trigger re-render of index.js
-            console.log(`AuthContext.login: Successfully setUserToken`)
+            console.log(`AuthContext.login: Successfully setUserToken(${token})`);
         } catch (err) {
             const message = err?.response?.data?.message || err?.message || 'Unable to log in. Please try again.';
             throw new Error(message);
@@ -82,6 +83,8 @@ export const AuthProvider = ({ children }) => {
         try {
             await SecureStore.deleteItemAsync(TOEKN_KEY);
             setUserToken(null);
+            console.log('AuthContext.logout: setUserToken(null)');
+            console.log(`userToken: ${userToken}`);
         } catch (err) {
             console.warn('Failed to clear token', err);
             // Even if SecureStore fails, ensure app state resets

@@ -13,16 +13,36 @@
 // define your navigators and screens inside a component, explicitly listing each screen using <Stack.Screen> 
 // and wrapping everything in a <NavigationContainer>
 
-import React from "react";
-import { AuthProvider } from '../src/context/AuthContext';
+import React, { useContext } from "react";
+import AuthContext, { AuthProvider } from '../src/context/AuthContext';
 import { Stack, Slot } from 'expo-router';
+import { View, ActivityIndicator } from "react-native";
 
 // The <Slot /> component renders the current child route. Expo Router will handle switching 
 // between the (auth) and (tabs) groups based on the logic in our index.js file.
 export default function RootLayout() {
+  // Inner component that has access to AuthContext
+  function RootLayoutNav() {
+    const { userToken, isLoading } = useContext(AuthContext);
+
+    // CRITICAL: Show loading while checking auth state
+    if (isLoading) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" />
+        </View>
+      );
+    }
+
+    // The Slot will render the appropriate route group based on the current route
+    // Expo Router will automatically show (auth) routes when userToken is null
+    // and (tabs) routes when userToken exists, based on our routing structure
+    return <Slot />;
+  }
+
   return (
     <AuthProvider>
-      <Slot />
+      <RootLayoutNav />
     </AuthProvider>
   );
 };

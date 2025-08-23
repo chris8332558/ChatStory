@@ -25,7 +25,6 @@ export default function LoginScreen() {
             await login(email, password);
             // Navigation to the home page will happen automatically via the root index file reading userToken
             console.log("login: Log in with:", email, password);
-            router.navigate("/home");
         } catch(err) {
             console.error(err);
             Alert.alert('Login Failed', 'Invalid credentials. Please try again (handleLogin)');
