@@ -4,6 +4,7 @@
 const express = require('express');
 const { connectToMongo } = require('./config');
 const authRoutes = require('./api/authRoutes');
+const roomRoutes = require('./api/roomRoutes');
 
 // If the connection fails, the application will exit (as defined in your config/index.js file), 
 // which is good because the app can't run properly without its database.
@@ -28,6 +29,7 @@ app.use(express.json());
 // Express will look inside the authRoutes file for a handler that matches the `/register` path. 
 // This keeps your main app.js file clean and delegates logic to specialized files.
 app.use('/api/auth', authRoutes);
+app.use('/api/rooms', roomRoutes);
 
 // Simple health check route
 // When a request hits this endpoint, the callback function (req, res) => {...} is executed, 

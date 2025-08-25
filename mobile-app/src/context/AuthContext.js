@@ -84,7 +84,6 @@ export const AuthProvider = ({ children }) => {
             await SecureStore.deleteItemAsync(TOEKN_KEY);
             setUserToken(null);
             console.log('AuthContext.logout: setUserToken(null)');
-            console.log(`userToken: ${userToken}`);
         } catch (err) {
             console.warn('Failed to clear token', err);
             // Even if SecureStore fails, ensure app state resets
