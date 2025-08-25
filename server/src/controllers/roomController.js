@@ -12,6 +12,7 @@ exports.createRoom = async (req, res) => {
         const newRoom = await Room.createRoom({ name, creator_id });
         res.status(201).json(newRoom);
     } catch (err) {
+        console.error('roomController: create room error:', err)
         res.status(501).json({ message: 'Server error' });
     }
 };
@@ -26,3 +27,5 @@ exports.getUserRooms = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+// exports.addUserToRoom = async (req, res)

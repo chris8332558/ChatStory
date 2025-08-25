@@ -1,7 +1,7 @@
 // Best practice: Create authentication middleware
 // This middleware will protect our future routes (like creating rooms) by verifying the JWT sent by the client.
 
-const jwt = requrie('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
 // This code exports a single function. This is the standard structure for Express middleware.
 // The next() is a special function. When called, it passes control to the next middleware or route handler in the chain, e.g. roomRoutes.
