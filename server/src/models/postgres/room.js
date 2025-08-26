@@ -2,7 +2,7 @@ const { pgPool } = require('../../config');
 
 const Room = {
     // Create a new room and automatically add the creator as a member
-    async creatRoom( {name, creator_id} ) {
+    async createRoom( {name, creator_id} ) {
         const client = await pgPool.connect();
         // If the first operation succeeds but the second fails, you'd end up with a room that has no members—not even its creator. 
         // A transaction ensures that either both operations succeed or both fail.

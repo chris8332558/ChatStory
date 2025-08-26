@@ -5,12 +5,12 @@ const authMiddleware = require('../middleware/auth'); // The JWT middleware
 
 router.use(authMiddleware);
 
-// @route POST /api/auth/rooms
+// @route POST /api/rooms
 // @desc Create a new room
 // @access Private
 router.post('/', roomController.createRoom);
 
-// @route GET /api/auth/rooms
+// @route GET /api/rooms
 // @desc get all rooms of the authenticated user
 // @access Private
 router.get('/', roomController.getUserRooms);

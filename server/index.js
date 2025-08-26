@@ -25,19 +25,24 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
+    // When a client joins a room
     socket.on('joinRoom', ({ room_id }) => {
         socket.join(room_id);
         console.log(`User ${socket.id} joined room ${room_id}`);
     })
     
 
+    // When a client sends a message
     // Listens for a custom event called sendMessage from this user's client.
     socket.on('sendMessage', (data) => {
-        const { room_id, message, user } = data;
+        const { room_id, message } = data; // Assume message is an object  { test, user }
+
+        // Here you would save the message to your MongoDB collection
+        // Message.create({ roomId, userId: message.user.id, content: message.text });
 
         // Broadcast the message to everyone in the room except the sender
         // This is the broadcasting logic. It sends the receiveMessage event to all users in the specified room except the sender. This prevents the sender from receiving their own message twice
-        socket.to(room_id).emit('reveiveMessage', { message, user });
+        socket.to(room_id).emit('reveiveMessage', message);
     })
 
     socket.on('disconnect', () => {
