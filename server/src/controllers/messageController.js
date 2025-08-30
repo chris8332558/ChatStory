@@ -1,4 +1,4 @@
-const Room = requrie('../models/postgres/room');
+const Room = require('../models/postgres/room');
 const Message = require('../models/mongo/message');
 
 exports.listRoomMessages = async (req, res) => {

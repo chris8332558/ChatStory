@@ -5,7 +5,7 @@ const express = require('express');
 const { connectToMongo } = require('./config');
 const authRoutes = require('./api/authRoutes');
 const roomRoutes = require('./api/roomRoutes');
-const messageRoutes = require('./api/messagetRoutes');
+const messageRoutes = require('./api/messageRoutes');
 
 // If the connection fails, the application will exit (as defined in your config/index.js file), 
 // which is good because the app can't run properly without its database.

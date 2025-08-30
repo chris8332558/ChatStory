@@ -1,5 +1,5 @@
 import AuthContext from "../../src/context/AuthContext";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import  { io, Socket } from 'socket.io-client';
 import { useContext, useEffect, useRef, useState } from "react";
 import apiClient from "../../src/api/client";
@@ -96,6 +96,7 @@ export default function ChatScreen() {
             <View style={styles.inputContainer}>
                 <TextInput style={styles.input} value={currentMessage} onChangeText={setCurrentMessage} placeholder="Type a message..." />
                 <Button title="Send" onPress={handleSendMesssage} />
+                <Button title="< Back" onPress={() => router.back()} />
             </View>
         </KeyboardAvoidingView>
     );
