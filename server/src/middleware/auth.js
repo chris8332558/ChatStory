@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 // The next() is a special function. When called, it passes control to the next middleware or route handler in the chain, e.g. roomRoutes.
 module.exports = function (req, res, next) {
     console.log('auth: enter auth middleware');
-    // Get token from header
+    // Get token from header, which is added from client
     const token = req.header('x-auth-token');
 
     // Check if not token

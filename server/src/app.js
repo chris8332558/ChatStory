@@ -5,6 +5,7 @@ const express = require('express');
 const { connectToMongo } = require('./config');
 const authRoutes = require('./api/authRoutes');
 const roomRoutes = require('./api/roomRoutes');
+const messageRoutes = require('./api/messagetRoutes');
 
 // If the connection fails, the application will exit (as defined in your config/index.js file), 
 // which is good because the app can't run properly without its database.
@@ -30,6 +31,11 @@ app.use(express.json());
 // This keeps your main app.js file clean and delegates logic to specialized files.
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
+app.use('/api/rooms/:room_id/messages', (req, res, next) => {
+    // mount nested router with params, which means any routes defined inside messageRoutes are automatically 
+    // prefixed with /api/rooms/:room_id/messages and can access req.params.room_id to know which room is being addressed.
+    require('./api/messageRoutes')(req, res, next)
+});
 
 // Simple health check route
 // When a request hits this endpoint, the callback function (req, res) => {...} is executed, 

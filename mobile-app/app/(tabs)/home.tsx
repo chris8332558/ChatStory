@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
 import { router } from 'expo-router';
 import { View, Button, Text, TextInput, StyleSheet, Alert, TouchableOpacity, FlatList, Modal } from 'react-native';
-import AuthContext from '../../src/context/AuthContext';
 import apiClient from "../../src/api/client";
 
 import ui from '../../src/ui/shared';
@@ -14,7 +13,6 @@ interface Room {
 }
 
 export default function HomeScreen() {
-    const { logout } = useContext(AuthContext);
     const [rooms, setRooms] = useState<Room[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [newRoomName, setNewRoomName] = useState('');
@@ -49,11 +47,6 @@ export default function HomeScreen() {
         }
     };
 
-    const handleLogout = async () => {
-        await logout();
-        console.log('home: logout');
-    };
-
     return (
         <View style={styles.container}>
             <Text>Welcome to the Home Screen!</Text>
@@ -82,7 +75,6 @@ export default function HomeScreen() {
                 </View>
             </Modal>
             
-            <Button title='Log out' onPress={handleLogout} />
         </View>
     )
 };

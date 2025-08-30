@@ -42,6 +42,14 @@ const Room = {
         return result.rows;
     },
 
+    async isMember({ user_id, room_id }) {
+        const res = await pgPool.query(
+            'SELECT 1 FROM Room_Members WHERE user_id = $1 AND room_id = $2 LIMIT 1',
+            [user_id, room_id]
+        );
+        return res.rowCount > 0;
+    },
+
     // (Optional) Add a user to a room
     // This method safely adds a user to a room without causing errors if they're already a member.
     // The `ON CONFLICT DO NOTHING` Clause:

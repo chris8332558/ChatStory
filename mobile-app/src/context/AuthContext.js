@@ -31,8 +31,8 @@ export const AuthProvider = ({ children }) => {
     const [userToken, setUserToken] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => { console.log('AuthContext token changed:', !!userToken); }, [userToken]);
-    useEffect(() => { console.log('UserToken now is:', userToken); }, [userToken]);
+    useEffect(() => { console.log('AuthContext: token changed:', !!userToken); }, [userToken]);
+    useEffect(() => { console.log('AuthContext: UserToken now is:', userToken); }, [userToken]);
 
     // Load token on app start (restore session)
     useEffect(() => {
