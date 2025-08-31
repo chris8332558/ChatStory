@@ -49,7 +49,6 @@ export default function HomeScreen() {
 
     return (
         <View style={styles.container}>
-            <Text>Welcome to the Home Screen!</Text>
             <FlatList 
                 data={rooms}
                 keyExtractor={(item) => item.room_id}
@@ -84,20 +83,34 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingHorizontal: 16,
         paddingTop: 12,
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: ui.colors.bg,
     },
 
     roomItem: {
-
+        paddingVertical: ui.spacing.lg,
+        paddingHorizontal: ui.spacing.md,
+        backgroundColor: ui.colors.white,
+        borderRadius: ui.radii.md,
+        marginBottom: ui.spacing.md,
+        borderWidth: 1,
+        borderColor: ui.colors.border,
+        shadowColor: '#000',
+        shadowOpacity: 0.06,
+        shadowRadius: ui.radii.sm,
+        shadowOffset: { width: 1, height: 2 },
+        elevation: 1,
     },
 
     roomName: {
-
+        fontSize: 16,
+        color: ui.colors.text,
+        fontWeight: 600,
     },
 
     header: {
         fontSize: 22,
+        paddingLeft: 5,
+        paddingVertical: 5,
     },
 
     modalContainer: {
