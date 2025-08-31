@@ -45,11 +45,15 @@ io.on('connection', (socket) => {
     console.log('io.on(connection): socket.id:', socket.id);
 
     // When a client joins a room. The server with this socket will listen to the 'joinRoom' event
-    socket.on('joinRoom', async ({ room_id }) => {
+    socket.on('joinRoom', async (room_id) => {
         try {
             const user_id = socket.user.id;
+            console.log(`server/index socket.on(joinRoom): user_id: ${user_id}, room_id: ${room_id}`);
             const isMember = await Room.isMember({ user_id, room_id });
-            if (!isMember) return;
+            if (!isMember) {
+                console.error('server/index: is not member');
+                return;
+            }
             socket.join(room_id); // This means this socket joined the `room` with name `room_id`
             console.log(`socket.on(joinRoom): User with socket.id ${socket.id} joined the room with room_id ${room_id}`);
         } catch (err) {
@@ -63,6 +67,7 @@ io.on('connection', (socket) => {
     // The sendMessage will contains { room_id, msg: Message }
     socket.on('sendMessage', async (data) => {
         try {
+            console.log('server/index: socket.on(sendMessage)')
             const user_id = socket.user.id;
             const username = socket.user.username;
             const { room_id, text } = data;
@@ -75,6 +80,7 @@ io.on('connection', (socket) => {
                 room_id, user_id, username, text: text.trim(),
             })
 
+            // fit the structure of Message in room_id.tsx
             const payload = {
                 _id: saved._id,
                 room_id: saved.room_id,
@@ -87,7 +93,7 @@ io.on('connection', (socket) => {
             // Broadcast the message to everyone in the room except the sender
             // This is the broadcasting logic. It sends the 'receiveMessage' event to all users in the specified room except the sender. This prevents the sender from receiving their own message twice
             io.to(room_id).emit('receiveMessage', payload);
-            console.log(`io.to(reveiceMessage): User ${socket.id} received a message from ${room_id}: ${message}`);
+            console.log(`io.to(reveiceMessage): Socket id: ${socket.id} received a message from room_id:${room_id}, text: ${text}`);
         } catch (err) {
             console.error('sendMessage error:', err);
         }

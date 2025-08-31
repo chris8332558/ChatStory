@@ -22,21 +22,23 @@ let db;
 async function connectToMongo() {
     try {
         await mongoClient.connect();
-        // Send a ping to confiem a successful connection
+        // Send a ping to confirm a successful connection
         await mongoClient.db("admin").command({ ping: 1 });
         db = mongoClient.db(); // Use the default BD from the URI
         console.log('Pinged your deloyment. Successfully connected to MongoDB Atlas');
     } catch (error) {
         console.error('Failed to connect to MongoDB', error);
         process.exit(1);
-    } finally {
-        // Ensures that the client will close when you finish/error
-        await mongoClient.close();
-    }
+    } 
 };
 
 // Function to get the MongoDB database instance
-const getDB = () => db;
+const getDB = () => {
+    if (!db) {
+        throw new Error('Mongo not connected: call connectToMongo() first');
+    }
+    return db;
+};
 
 // Standard Node.js way of making functions and variables from on file availble to other files.
 module.exports = {

@@ -33,7 +33,7 @@ export default function ChatScreen() {
     useEffect(() => {
         let mounted = true;
         const fetchMessageHistory = async() => {
-            console.log("room_id: fetch message history")
+            console.log("[room_id].tsx: fetch message history")
             if (!room_id) {
                 console.error('room_id is null');
                 return;
@@ -70,16 +70,17 @@ export default function ChatScreen() {
         socketRef.current = s;
 
         s.on('connect', () => {
+            console.log(`room_id: s.on(connect) room_id: ${room_id}`);
             s.emit('joinRoom', room_id);
         })
 
         // Listen for incoming message
         s.on('receiveMessage', (msg: Message) => {
-            setMessages((preMessages) => [msg, ...preMessages]);
+            setMessages(preMessages => [msg, ...preMessages]);
         });
 
         s.on('connect_error', (err) => {
-            console.error('[roomId].tsx: Socket connect_error', err);
+            console.error('[room_id].tsx: Socket connect_error', err);
         })
 
         // Discount on connect unmount
@@ -96,7 +97,7 @@ export default function ChatScreen() {
         else if (currentMessage.trim()) {
             const text = currentMessage.trim()
             socketRef.current.emit('sendMessage', { room_id, text });
-            //setMessages((prevMessages) => [messageData, ...prevMessages]); // Don't need to setMessages?
+            //setMessages((prevMessages) => [messageData, ...prevMessages]); // Don't need to setMessages. the s.on('receiveMessage') above will handle this
             setCurrentMessage('');
         }
     };
@@ -108,6 +109,7 @@ export default function ChatScreen() {
     return (
         <KeyboardAvoidingView style={styles.container} keyboardVerticalOffset={90}>
             <FlatList
+                inverted // Shows latest messages at the bottom
                 data={messages}
                 renderItem={({ item }) => (
                 <View style={styles.messageBubble}>
@@ -116,7 +118,6 @@ export default function ChatScreen() {
                 </View>
                 )}
                 keyExtractor={(item, index) => `${item.created_at}-${index}`}
-                inverted // Shows latest messages at the bottom
                 style={styles.messageList}
             />
             <View style={styles.inputContainer}>
