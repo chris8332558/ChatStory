@@ -5,6 +5,7 @@ const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const Room = require('./src/models/postgres/room');
 const Message = require('./src/models/mongo/message');
+const { disconnectMongo } = require('./src/config');
 
 // http.createServer(app): Creates an HTTP server that wraps your existing Express application. 
 // This is necessary because Socket.IO needs to attach to the underlying HTTP server, not just the Express app.
@@ -104,7 +105,29 @@ io.on('connection', (socket) => {
     });
 });
 
+// Graceful shutdown
+function shutdown(signal) {
+    console.log(`\n${signal} receieved, shotting down...`);
+    // Stop accepting new connections; finish ongoing ones
+    server.close(async() => {
+        try {
+            disconnectMongo();           
+        } catch (err) {
+            console.error('Error closing Mongo', err);
+        } finally {
+            process.exit(0);
+        }
+    })
 
+    // Fallback: force exit if not closed in time
+    setTimeout(() => {
+        console.error('Force exist after timeout', err);
+        process.exit(1);
+    }, 5000).unref();
+}
+
+process.on('SIGINT', () => shutdown('SIGINT')); // ctrl + c locally
+process.on('SIGTERM', () => shutdown('SIGTERM')); // sent by container/orchestrator
 
 const port = process.env.PORT || 3000
 

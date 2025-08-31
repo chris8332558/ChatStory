@@ -40,9 +40,16 @@ const getDB = () => {
     return db;
 };
 
+async function disconnectMongo() {
+    if (mongoClient) await mongoClient.close();
+    mongoClient = undefined;
+    db = undefined;
+}
+
 // Standard Node.js way of making functions and variables from on file availble to other files.
 module.exports = {
     pgPool: pool,
     connectToMongo,
+    disconnectMongo,
     getDB
 };
