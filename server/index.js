@@ -65,29 +65,42 @@ io.on('connection', (socket) => {
             const user_id = socket.user.id;
             const username = socket.user.username;
             const { room_id, message } = data; // Assume message is an Message object { text, user, createAt } defined in [roomid].tsx
+
+            if (!message || !message.trim()) return;
+            const isMember = await Room.isMember({ user_id, room_id });
+            if (!isMember) return;
+
+            const saved = await Message.create({
+                room_id, user_id, username, text: message.trim(),
+            })
+
+            const payload = {
+                id: saved._id,
+                roomId: saved.roomId,
+                userId: saved.userId,
+                username: saved.username,
+                text: saved.text,
+                createdAt: saved.createdAt,
+            };
+
+            // Broadcast the message to everyone in the room except the sender
+            // This is the broadcasting logic. It sends the 'receiveMessage' event to all users in the specified room except the sender. This prevents the sender from receiving their own message twice
+            io.to(room_id).emit('receiveMessage', payload);
+            console.log(`io.to(reveiceMessage): User ${socket.id} received a message from ${room_id}: ${message}`);
         } catch (err) {
-
+            console.error('sendMessage error:', err);
         }
-
-        // Here you would save the message to your MongoDB collection
-        // Message.create({ roomId, userId: message.user.id, content: message.text });
-
-        // Broadcast the message to everyone in the room except the sender
-        // This is the broadcasting logic. It sends the 'receiveMessage' event to all users in the specified room except the sender. This prevents the sender from receiving their own message twice
-        socket.to(room_id).emit('receiveMessage', message);
-        console.log(`socket.to(reveiceMessage): User ${socket.id} received a message from ${room_id}`);
-    })
+    });
 
     socket.on('disconnect', () => {
         console.log('User disconnected: ', socket.id);
-    })
-
-})
+    });
+});
 
 
 
 const port = process.env.PORT || 3000
 
 server.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+    console.log(`Server + WebSocket are listening on port ${port}`);
 });

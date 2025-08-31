@@ -77,7 +77,7 @@ exports.login = async (req, res) => {
             },
         };
 
-        // 4. Sign the token
+        // 4. Sign the token. It'll be decoded using "const decoded = jwt.verify(token, process.env.JWT_SECRET);" in the auth middleware
         jwt.sign(payload, 
             process.env.JWT_SECRET, // This is used to create a unique, verifiable signature. 
             { expiresIn: '7d' }, // Token expires in 7 days

@@ -20,9 +20,10 @@ module.exports = function (req, res, next) {
     try {
         // jwt.verify() checks if the token is expired, verifies the token's signature is valid, 
         // and decodes the token and return its original payload.
+        // The token is created in authContoller::login
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded.user; // Add the user payload to the request object
-        console.log(`auth: req.user: ${req.user.json}`);
+        console.log(`auth: decoded jwt token: req.user.id: ${req.user.id}, req.user.username: ${req.user.username}`);
         next(); // The next middleware will be able to use req.user.id, e.g. in roomController.createRoom()
     } catch (err) {
         res.status(401).json({ message: 'Token is invalid' });
