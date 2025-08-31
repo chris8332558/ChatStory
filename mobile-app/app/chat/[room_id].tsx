@@ -57,7 +57,7 @@ export default function ChatScreen() {
     // Manage WebSocket connection
     useEffect(() => {
         if (!room_id || !userToken) {
-            console.error(`room_id: ${room_id}, userToken: ${userToken}`);
+            console.error(`[room_id].tsx: ${room_id}, userToken: ${userToken}`);
             return;
         }
 
@@ -70,7 +70,7 @@ export default function ChatScreen() {
         socketRef.current = s;
 
         s.on('connect', () => {
-            console.log(`room_id: s.on(connect) room_id: ${room_id}`);
+            console.log(`[room_id].tsx: s.on(connect) room_id: ${room_id}`);
             s.emit('joinRoom', room_id);
         })
 
@@ -92,7 +92,7 @@ export default function ChatScreen() {
 
     const handleSendMesssage = () => {
         if (!socketRef.current) {
-            console.error("roomId.tsx: socketRef.current is null");
+            console.error("[roomId].tsx: socketRef.current is null");
         }
         else if (currentMessage.trim()) {
             const text = currentMessage.trim()

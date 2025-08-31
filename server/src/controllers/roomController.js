@@ -4,7 +4,7 @@ exports.createRoom = async (req, res) => {
     try {
         const { name } = req.body;
         const creator_id = req.user.id; // From the auth middleware
-        console.log(`roomController::createRoom: creator_id: ${creator_id}`);
+        console.log(`roomController: createRoom: creator_id: ${creator_id}`);
 
         if (!name) {
             return res.status(400).json({ message: 'Room name is required' });

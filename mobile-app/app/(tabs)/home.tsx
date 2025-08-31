@@ -20,7 +20,8 @@ export default function HomeScreen() {
     const fetchRooms = useCallback(async () => {
         try {
             const response = await apiClient.get('/rooms');
-            console.log('fetchrooms:', response.data);
+            console.log('home.tsx: fetchrooms');
+            // console.log('fetchrooms:', response.data);
             setRooms(response.data);
         } catch (err) {
             console.error('Failed to fetch rooms', err);

@@ -23,6 +23,7 @@ const io = new Server(server, {
 // Socket auth middleware: Registers a middleware, which is a function that gets executed for every incoming Socket.
 io.use((socket, next) => {
     try {
+        console.log('server/index: io.use((socket, next))');
         const token = socket.handshake.auth?.token ||
                     socket.handshake.headers['x-auth-token'] ||
                     socket.handshake.query?.token;
@@ -43,20 +44,20 @@ io.use((socket, next) => {
 // Represents the individual connection to that specific user. Each user gets a unique socket object with a unique socket.id.
 // This is where you define all the real-time interactions for each connected user.
 io.on('connection', (socket) => {
-    console.log('io.on(connection): socket.id:', socket.id);
+    console.log('server/index: io.on(connection): socket.id:', socket.id);
 
     // When a client joins a room. The server with this socket will listen to the 'joinRoom' event
     socket.on('joinRoom', async (room_id) => {
         try {
             const user_id = socket.user.id;
-            console.log(`server/index socket.on(joinRoom): user_id: ${user_id}, room_id: ${room_id}`);
+            console.log(`server/index: socket.on(joinRoom): user_id: ${user_id}, room_id: ${room_id}`);
             const isMember = await Room.isMember({ user_id, room_id });
             if (!isMember) {
                 console.error('server/index: is not member');
                 return;
             }
             socket.join(room_id); // This means this socket joined the `room` with name `room_id`
-            console.log(`socket.on(joinRoom): User with socket.id ${socket.id} joined the room with room_id ${room_id}`);
+            console.log(`server/index: socket.on(joinRoom): User with socket.id ${socket.id} joined the room with room_id ${room_id}`);
         } catch (err) {
             console.error('server/index: joinRoom error:', err);
         }
@@ -94,7 +95,7 @@ io.on('connection', (socket) => {
             // Broadcast the message to everyone in the room except the sender
             // This is the broadcasting logic. It sends the 'receiveMessage' event to all users in the specified room except the sender. This prevents the sender from receiving their own message twice
             io.to(room_id).emit('receiveMessage', payload);
-            console.log(`io.to(reveiceMessage): Socket id: ${socket.id} received a message from room_id:${room_id}, text: ${text}`);
+            console.log(`server/index: io.to(reveiceMessage): Socket id: ${socket.id} received a message from room_id:${room_id}, text: ${text}`);
         } catch (err) {
             console.error('sendMessage error:', err);
         }

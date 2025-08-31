@@ -18,9 +18,9 @@ const MessageModel = {
         const filter = { room_id };
         if (before) {
             // fetch messages older than a given timestamp
-            //filter.created_at = { $lt: new Date(before) };
+            // filter.created_at = { $lt: new Date(before) };
         }
-        const items = await db.collection(COLLECTION).find(filter).sort({ createdAt: -1 }).limit(limit).toArray();
+        const items = await db.collection(COLLECTION).find(filter).sort({ created_at: -1 }).limit(limit).toArray();
         return items;
     },
 
