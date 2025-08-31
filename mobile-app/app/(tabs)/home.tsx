@@ -53,7 +53,7 @@ export default function HomeScreen() {
                 data={rooms}
                 keyExtractor={(item) => item.room_id}
                 renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => router.push(`/chat/${item.room_id}?roomName=${item.name}`)}>
+                    <TouchableOpacity onPress={() => router.push(`/chat/${item.room_id}?room_name=${item.name}`)}>
                         <View style={styles.roomItem}>
                             <Text style={styles.roomName}>{item.name}</Text>
                         </View>

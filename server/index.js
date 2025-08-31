@@ -37,50 +37,51 @@ io.use((socket, next) => {
 
 
 
-// Realtime logic
+// Socket.IO server realtime logic
 // io.on('connection', ...): Listens for new client connections. Every time a user opens your app, this callback fires
 // Represents the individual connection to that specific user. Each user gets a unique socket object with a unique socket.id.
 // This is where you define all the real-time interactions for each connected user.
 io.on('connection', (socket) => {
-    console.log('io.on(connection): A user connected:', socket.id);
+    console.log('io.on(connection): socket.id:', socket.id);
 
     // When a client joins a room. The server with this socket will listen to the 'joinRoom' event
     socket.on('joinRoom', async ({ room_id }) => {
         try {
-            const userId = socket.user.id;
+            const user_id = socket.user.id;
             const isMember = await Room.isMember({ user_id, room_id });
             if (!isMember) return;
             socket.join(room_id); // This means this socket joined the `room` with name `room_id`
-            console.log(`socket.on(joinRoom): User ${socket.id} joined room ${room_id}`);
+            console.log(`socket.on(joinRoom): User with socket.id ${socket.id} joined the room with room_id ${room_id}`);
         } catch (err) {
             console.error('server/index: joinRoom error:', err);
         }
     })
     
 
-    // When a client sends a message
+    // When another client sends a message
     // Listens for a custom event called 'sendMessage' from this user's client.
+    // The sendMessage will contains { room_id, msg: Message }
     socket.on('sendMessage', async (data) => {
         try {
             const user_id = socket.user.id;
             const username = socket.user.username;
-            const { room_id, message } = data; // Assume message is an Message object { text, user, createAt } defined in [roomid].tsx
+            const { room_id, text } = data;
 
-            if (!message || !message.trim()) return;
+            if (!text || !text.trim()) return;
             const isMember = await Room.isMember({ user_id, room_id });
             if (!isMember) return;
 
             const saved = await Message.create({
-                room_id, user_id, username, text: message.trim(),
+                room_id, user_id, username, text: text.trim(),
             })
 
             const payload = {
-                id: saved._id,
-                roomId: saved.roomId,
-                userId: saved.userId,
+                _id: saved._id,
+                room_id: saved.room_id,
+                user_id: saved.user_id,
                 username: saved.username,
                 text: saved.text,
-                createdAt: saved.createdAt,
+                created_at: saved.created_at,
             };
 
             // Broadcast the message to everyone in the room except the sender

@@ -34,6 +34,7 @@ app.use('/api/rooms', roomRoutes);
 app.use('/api/rooms/:room_id/messages', (req, res, next) => {
     // mount nested router with params, which means any routes defined inside messageRoutes are automatically 
     // prefixed with /api/rooms/:room_id/messages and can access req.params.room_id to know which room is being addressed.
+    // in messageRoutes.js, need to have 'const router = express.Router({ mergeParams: true });' so the child router will be able to see the parents' params, e.g. room_id here
     require('./api/messageRoutes')(req, res, next)
 });
 

@@ -3,10 +3,13 @@ const Message = require('../models/mongo/message');
 
 exports.listRoomMessages = async (req, res) => {
     try {
+        console.log('messageController: listRoomMessages, req.params:', req.params);
         const { room_id } = req.params; // extract room_id from URL params
         const { limit, before } = req.query;
+        // const { limit } = req.query;
         const user_id = req.user.id; // set by auth middleware
 
+        console.log(`messageController: listRoomMessages: room_id: ${room_id}, limit: ${limit}, before: ${before}, user_id: ${user_id}`);
         const isMember = await Room.isMember({ user_id, room_id });
         if (!isMember) {
             return res.status(403).json({ message: 'Not a member of this room' });
@@ -20,7 +23,7 @@ exports.listRoomMessages = async (req, res) => {
         // Maps MongoDB docs to API-friendly json
         res.json(
             msgs.map(m => ({
-                id: m._id,
+                _id: m._id,
                 room_id: m.room_id,
                 user_id: m.user_id,
                 username: m.username,
@@ -29,7 +32,7 @@ exports.listRoomMessages = async (req, res) => {
             }))
         );
     } catch (err) {
-        console.err('listRoomMessages error:', err);
+        console.error('listRoomMessages error:', err);
         res.status(500).json({ message: 'Server error' });
     }
 };
