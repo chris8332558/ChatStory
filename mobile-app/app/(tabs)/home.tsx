@@ -41,7 +41,7 @@ export default function HomeScreen() {
             await apiClient.post('/rooms', { name: newRoomName });
             setNewRoomName('');
             setModalVisible(false);
-            fetchRooms(); // Re-fetch rooms to show the new one
+            await fetchRooms(); // Re-fetch rooms to show the new one
         } catch (err) {
             console.error('Failed to create room', err);
             Alert.alert('Error', 'Could not create the room.');

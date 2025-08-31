@@ -1,3 +1,7 @@
+// This screen is a real-time chat UI that ties together four pieces: Expo Router for routing, a REST API for history, 
+// Socket.IO for live updates, and the JWT from the auth context for socket authentication. It first loads recent messages 
+// over HTTP, then opens an authenticated socket, joins the room, listens for new messages, and lets the user send messages. 
+// The server persists messages and broadcasts them to room members, which this screen renders as they arrive
 import AuthContext from "../../src/context/AuthContext"; // Read the JWT
 import { router, useLocalSearchParams } from "expo-router";
 import  { io, Socket } from 'socket.io-client'; // Talk to the WebSocket server
@@ -61,6 +65,9 @@ export default function ChatScreen() {
             return;
         }
 
+        // Creates the client with transports:['websocket'] to prefer WebSocket in React Native, which often avoids polling issues.
+        // The JWT is sent in the auth field of the handshake; on the server, io.use middleware reads socket.handshake.auth.token, 
+        // verifies it, and stores the decoded user on socket, rejecting unauthorized clients
         const s = io(SOCKET_URL, {
             transports: ['websocket'],
             auth: { token: userToken }, // send JWT to server auth middleware
@@ -117,11 +124,11 @@ export default function ChatScreen() {
                     <Text style={styles.messageText}>{item.text}</Text>
                 </View>
                 )}
-                keyExtractor={(item, index) => `${item.created_at}-${index}`}
+                keyExtractor={(item) => item._id?.toString() || `${item.created_at}-${item.user_id}`}
                 style={styles.messageList}
             />
             <View style={styles.inputContainer}>
-                <TextInput style={styles.input} value={currentMessage} onChangeText={setCurrentMessage} placeholder="Type a message..." />
+                <TextInput style={styles.input} value={currentMessage} onChangeText={setCurrentMessage} placeholder="Type a message..." returnKeyType="send" onSubmitEditing={handleSendMesssage}/>
                 <Button title="Send" onPress={handleSendMesssage} />
                 <Button title="< Back" onPress={() => router.back()} />
             </View>
