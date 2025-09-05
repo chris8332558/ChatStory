@@ -79,7 +79,7 @@ export default function ChatScreen() {
         s.on('connect', () => {
             console.log(`[room_id].tsx: s.on(connect) room_id: ${room_id}`);
             s.emit('joinRoom', room_id);
-        })
+        });
 
         // Listen for incoming message
         s.on('receiveMessage', (msg: Message) => {

@@ -2,14 +2,10 @@
 // connects to the database, and sets up middleware and routes.
 
 const express = require('express');
-const { connectToMongo } = require('./config');
 const authRoutes = require('./api/authRoutes');
 const roomRoutes = require('./api/roomRoutes');
 const messageRoutes = require('./api/messageRoutes');
 
-// If the connection fails, the application will exit (as defined in your config/index.js file), 
-// which is good because the app can't run properly without its database.
-connectToMongo();
 
 // This line creates an instance of an Express application. 
 // The app object is the core of your server; you will use it to configure everything else.
@@ -31,12 +27,9 @@ app.use(express.json());
 // This keeps your main app.js file clean and delegates logic to specialized files.
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
-app.use('/api/rooms/:room_id/messages', (req, res, next) => {
-    // mount nested router with params, which means any routes defined inside messageRoutes are automatically 
-    // prefixed with /api/rooms/:room_id/messages and can access req.params.room_id to know which room is being addressed.
-    // in messageRoutes.js, need to have 'const router = express.Router({ mergeParams: true });' so the child router will be able to see the parents' params, e.g. room_id here
-    require('./api/messageRoutes')(req, res, next)
-});
+app.use('/api/rooms/:room_id/messages', messageRoutes); 
+// In messageRoutes.js, need to have 'const router = express.Router({ mergeParams: true });' so the child router will be able to see the parents' params, e.g. room_id here
+// e.g. can access req.params.room_id to know which room is being addressed.
 
 // Simple health check route
 // When a request hits this endpoint, the callback function (req, res) => {...} is executed, 

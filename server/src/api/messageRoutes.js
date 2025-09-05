@@ -1,5 +1,5 @@
 const express = require('express');
-const router = express.Router({ mergeParams: true });
+const router = express.Router({ mergeParams: true }); // the router can access to the req params
 const messageController = require('../controllers/messageController');
 const authMiddleware = require('../middleware/auth');
 

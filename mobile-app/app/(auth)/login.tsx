@@ -1,10 +1,7 @@
-// Expo will
 import React, { useState, useContext } from "react";
-import { Link, useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import { View, TextInput, Button, StyleSheet, Alert } from "react-native";
-import apiClient from '../../src/api/client';
 import AuthContext from '../../src/context/AuthContext';
-import * as SecureStore from 'expo-secure-store';
 
 // Defines the screen component. It receives the navigation prop from React Navigation, which allows it to move to other screens.
 export default function LoginScreen() {
@@ -12,7 +9,6 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('');
     const { login, isLoading } = useContext(AuthContext);
 
-    const router = useRouter();
     // Triggered when the Login button is pressed
     const handleLogin = async () => {
         if (!email || !password) {

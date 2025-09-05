@@ -6,6 +6,11 @@ const jwt = require('jsonwebtoken');
 const Room = require('./src/models/postgres/room');
 const Message = require('./src/models/mongo/message');
 const { disconnectMongo } = require('./src/config');
+const { connectToMongo } = require('./src/config');
+
+// If the connection fails, the application will exit (as defined in your config/index.js file), 
+// which is good because the app can't run properly without its database.
+connectToMongo();
 
 // http.createServer(app): Creates an HTTP server that wraps your existing Express application. 
 // This is necessary because Socket.IO needs to attach to the underlying HTTP server, not just the Express app.
@@ -40,7 +45,7 @@ io.use((socket, next) => {
 
 
 // Socket.IO server realtime logic
-// io.on('connection', ...): Listens for new client connections. Every time a user opens your app, this callback fires
+// io.on('connection', ...): Listens for new client connections. Every time a user opens your app and go to a chatroom, this callback fires
 // Represents the individual connection to that specific user. Each user gets a unique socket object with a unique socket.id.
 // This is where you define all the real-time interactions for each connected user.
 io.on('connection', (socket) => {
@@ -95,14 +100,14 @@ io.on('connection', (socket) => {
             // Broadcast the message to everyone in the room except the sender
             // This is the broadcasting logic. It sends the 'receiveMessage' event to all users in the specified room except the sender. This prevents the sender from receiving their own message twice
             io.to(room_id).emit('receiveMessage', payload);
-            console.log(`server/index: io.to(reveiceMessage): Socket id: ${socket.id} received a message from room_id:${room_id}, text: ${text}`);
+            console.log(`server/index: io.to(receiveMessage): Socker server emit(receiveMessage) to room:${room_id}, text: ${text}`);
         } catch (err) {
             console.error('sendMessage error:', err);
         }
     });
 
     socket.on('disconnect', () => {
-        console.log('User disconnected: ', socket.id);
+        console.log('server/index: socket.on(disconnect): User disconnected: ', socket.id);
     });
 });
 

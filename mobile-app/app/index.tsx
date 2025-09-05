@@ -9,15 +9,15 @@ import { View, StyleSheet, ActivityIndicator } from "react-native";
 // Defines the screen component. It receives the navigation prop from React Navigation, which allows it to move to other screens.
 export default function Index() {
     const { userToken, isLoading } = useContext(AuthContext);
-    console.log('index: isLoading=', isLoading, 'userToken=', !!userToken)
+    console.log('Render Index: index: isLoading=', isLoading, 'userToken=', !!userToken)
 
     // CRITICAL: This redirect should trigger every time userToken changes
     if (userToken) {
         // User is singed in, redirect to the home page
-        console.log('index: has userToken, redirect to home page');
+        console.log('index: Has userToken, redirect to home page');
         return <Redirect href="/home" />;
     } else {
-        console.log("index: has no userToken, go to login screen");
+        console.log("index: Has no userToken, go to login screen");
         return <Redirect href="/login" />;
     }
 }

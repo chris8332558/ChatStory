@@ -5,7 +5,6 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import apiClient from '../api/client'; // axios instance configured with baseURL and interceptor
-import { isLoading } from 'expo-font';
 
 const TOEKN_KEY = 'userToken';
 
@@ -53,14 +52,15 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     // Login: call backend, get the token and store it SecureStore, update user token
+    // useCallback will prevent the child component to be re-rendered if the dependencies didn't change
     const login = useCallback(async (email, password) => {
         if (!email || !password) {
             throw new Error('Email and password are required.');
         }
         setIsLoading(true);
         try {
-            const res = await apiClient.post('/auth/login', {email, password});
-            const token = res?.data?.token;
+            const res = await apiClient.post('/auth/login', {email, password}); // { email, password } will be the req.body
+            const token = res?.data?.token; // The token is added by the apiClient.interceptor
             if (!token) {
                 console.log(`AuthContext: error: setUserToken ${token}`)
                 throw new Error('Login response missing token.');

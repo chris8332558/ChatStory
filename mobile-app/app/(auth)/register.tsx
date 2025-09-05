@@ -1,15 +1,14 @@
-import { useState } from "react";
+import { useState, useContext } from 'react';
 import { Alert, View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import apiClient from "../../src/api/client";
-import { Link, router } from 'expo-router'; // Use Link for navigation
-import { useContext } from "react";
+import { Link } from 'expo-router'; // Use Link for navigation
 import AuthContext from "../../src/context/AuthContext";
+import { isAxiosError } from 'axios';
 
 export default function RegisterScreen() {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const {register, isLoading, userToken} = useContext(AuthContext);
+    const {register, isLoading } = useContext(AuthContext);
 
     const handleRegister = async() => {
         if (!username || !email || !password) {
@@ -17,16 +16,14 @@ export default function RegisterScreen() {
             return;
         }
 
-
+        let errorMessage = 'An unexpected error occurred.';
         try {
             await register(username.trim(), email.trim(), password);
-            // if (!userToken) {
-            //     Alert.alert('Registration Successful', 'You can now log in with your credentials.');
-            //     router.replace('/login');
-            // }
         } catch (err) {
             console.error('Registration failed:', err);
-            const errorMessage = err.response?.data?.message || 'An unexpected error occurred.';
+            if (isAxiosError(err) && err.response) {
+                errorMessage = err.response.data.message;
+            }
             Alert.alert('Registration Failed', errorMessage);
         };
     };

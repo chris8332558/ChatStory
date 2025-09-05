@@ -6,8 +6,8 @@ import * as SecureStore from 'expo-secure-store';
 // Replace with your computer's local IPv4 address. Need to change when connect to different wifi
 // Find LAN IP (in terminal): networksetup -getinfo Wi-Fi | grep "IP address"
 
-// const API_BASE_URL = 'http://192.168.10.122:3000/api';
-const API_BASE_URL = 'http://192.168.0.200:3000/api';
+const API_BASE_URL = 'http://192.168.10.122:3000/api';
+// const API_BASE_URL = 'http://10.37.244.216:3000/api';
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
@@ -18,9 +18,11 @@ const apiClient = axios.create({
 // Interceptors run for every request made by the Axios instance they’re attached to and return the possibly modified config/response (or a rejected promise to abort)
 // This will be used in protected requests, e.g. fetchRooms, or the token will be null and cause error.
 apiClient.interceptors.request.use(async (config) => {
+    console.log('client.js: Go through intercepetor');
     const token = await SecureStore.getItemAsync('userToken');
     // Attach to header (your server expects 'x-auth-token'; otherwise prefer Authorization: Bearer <token>)
     if (token) {
+        console.log('client.js: Add \'x-auth-token\' to the request config');
         config.headers['x-auth-token'] = token; // allow request to continue
         // Preferred standard in to use config.headers.Authorization = `Bearer ${token}`
     }

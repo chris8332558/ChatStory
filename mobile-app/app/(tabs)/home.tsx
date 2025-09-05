@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { router } from 'expo-router';
 import { View, Button, Text, TextInput, StyleSheet, Alert, TouchableOpacity, FlatList, Modal } from 'react-native';
 import apiClient from "../../src/api/client";
@@ -21,7 +21,6 @@ export default function HomeScreen() {
         try {
             const response = await apiClient.get('/rooms');
             console.log('home.tsx: fetchrooms');
-            // console.log('fetchrooms:', response.data);
             setRooms(response.data);
         } catch (err) {
             console.error('Failed to fetch rooms', err);
@@ -38,7 +37,7 @@ export default function HomeScreen() {
             Alert.alert('Invalid Name', 'Room name connot be empty.');
         }
         try {
-            await apiClient.post('/rooms', { name: newRoomName });
+            await apiClient.post('/rooms', { name: newRoomName }); // { name } will be in the req.body
             setNewRoomName('');
             setModalVisible(false);
             await fetchRooms(); // Re-fetch rooms to show the new one
