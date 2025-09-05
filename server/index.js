@@ -127,7 +127,7 @@ function shutdown(signal) {
 
     // Fallback: force exit if not closed in time
     setTimeout(() => {
-        console.error('Force exist after timeout', err);
+        console.error('Force exist after timeout');
         process.exit(1);
     }, 5000).unref();
 }
