@@ -5,6 +5,7 @@ const express = require('express');
 const authRoutes = require('./api/authRoutes');
 const roomRoutes = require('./api/roomRoutes');
 const messageRoutes = require('./api/messageRoutes');
+const membershipRoutes = require('./api/membershipRoutes');
 
 
 // This line creates an instance of an Express application. 
@@ -28,6 +29,8 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/rooms/:room_id/messages', messageRoutes); 
+app.use('/api/rooms/:room_id/members', membershipRoutes); 
+// app.use('/api/rooms/invites/redeem', membershipRoutes); 
 // In messageRoutes.js, need to have 'const router = express.Router({ mergeParams: true });' so the child router will be able to see the parents' params, e.g. room_id here
 // e.g. can access req.params.room_id to know which room is being addressed.
 

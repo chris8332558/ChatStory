@@ -7,9 +7,10 @@ import { router, useLocalSearchParams } from "expo-router";
 import  { io, Socket } from 'socket.io-client'; // Talk to the WebSocket server
 import { useContext, useEffect, useRef, useState } from "react";
 import apiClient from "../../src/api/client";
-import { ActivityIndicator, FlatList, Button, View, Text, StyleSheet, TextInput, KeyboardAvoidingView, Alert } from "react-native";
+import { ActivityIndicator, FlatList, Button, View, Text, StyleSheet, TextInput, KeyboardAvoidingView, Alert, Modal } from "react-native";
 import ui from '../../src/ui/shared';
 import { fetchRoomMessages } from "../../src/api/messages";
+import { addUserToRoom } from "../../src/api/members";
 
 // apiClient.getUri() returns 'http://10.1.16.172:3000/api'
 // Points at the Socket.IO server
@@ -30,6 +31,9 @@ export default function ChatScreen() {
     const [ messages, setMessages ] = useState<Message[]>([]);
     const [ currentMessage, setCurrentMessage ] = useState('');
     const [ loadingHistory, setLoadingHistory ] = useState(false);
+
+    const [ emailToAdd, setEmailToAdd ] = useState('');
+    const [ addMemberModalVisible, setAddMemberModalVisible] = useState(false);
     const { userToken } = useContext(AuthContext); // We can get user id and user name from the userToken (user.id, user.username)
     const socketRef = useRef<Socket | null>(null); // Holds the live Socker.IO client instance across renders (useRef avoids reconnecting on every render)
 
@@ -109,6 +113,23 @@ export default function ChatScreen() {
         }
     };
 
+    async function handleAddMember() {
+        console.log(`[room_id].tsx: handleAddMember`);
+        if (!emailToAdd.trim()) {
+            Alert.alert('Email Is Required', 'Enter the email to add the user');
+            return;
+        }
+        try {
+            const res = await addUserToRoom(room_id as string, { email: emailToAdd.trim() });
+            Alert.alert('Success', `User added (${emailToAdd})`);
+            setEmailToAdd('');
+        } catch (err) {
+            Alert.alert('Error', 'Conld not add user');
+            console.log('[room_id].tsx: handleAddMember error', err);
+        }
+    };
+
+
     if (loadingHistory) {
         return <ActivityIndicator size='large' style={{ flex: 1 }} />
     }
@@ -131,7 +152,19 @@ export default function ChatScreen() {
                 <TextInput style={styles.input} value={currentMessage} onChangeText={setCurrentMessage} placeholder="Type a message..." returnKeyType="send" onSubmitEditing={handleSendMesssage}/>
                 <Button title="Send" onPress={handleSendMesssage} />
                 <Button title="< Back" onPress={() => router.back()} />
+                <Button title="Add Member" onPress={() => setAddMemberModalVisible(true)} />
             </View>
+
+            <Modal visible={addMemberModalVisible} animationType="slide" transparent={true}>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Add Member</Text>
+                        <TextInput style={styles.input} placeholder="Enter User Email" value={emailToAdd} onChangeText={setEmailToAdd}/>
+                        <Button title="Add" onPress={handleAddMember}/>
+                        <Button title="Cancel" onPress={() => setAddMemberModalVisible(false)} color="red" />
+                    </View>
+                </View>
+            </Modal>
         </KeyboardAvoidingView>
     );
 };
@@ -179,12 +212,34 @@ const styles = StyleSheet.create({
     },
 
     input: {
-        flex: 1,
+        //flex: 1,
         height: 44,
         borderWidth: 1,
         borderColor: ui.colors.input,
         borderRadius: ui.radii.md,
         paddingHorizontal: 12,
         backgroundColor: ui.colors.white,
+    },
+
+    modalContainer: {
+        flex: 1,
+        backgroundColor: ui.colors.overlay,
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+    },
+
+    modalContent: {
+        backgroundColor: ui.colors.white,
+        borderRadius: ui.radii.lg,
+        padding: ui.spacing.lg,
+        borderWidth: 1,
+        borderColor: ui.colors.border,
+    },
+
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: ui.colors.text,
+        marginBottom: ui.spacing.md,
     },
 });
