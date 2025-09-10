@@ -25,6 +25,7 @@ exports.addMember = async (req, res) => {
         
         console.log(`user_id_to_add: ${user_id_to_add}`);
         await Room.addUserToRoom({ user_id: user_id_to_add, room_id });
+        // Idempotent response: return 204 or 200 with a stable body. Preventing repeated submissions.
         return res.status(204).send();
         
     } catch (err) {

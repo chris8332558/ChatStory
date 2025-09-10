@@ -22,7 +22,7 @@ export default function LoginScreen() {
             // Navigation to the home page will happen automatically via the root index file reading userToken
             console.log("login: Log in with:", email, password);
         } catch(err) {
-            console.error(err);
+            console.error('login.tsx:: handleLogin failed:', err);
             Alert.alert('Login Failed', 'Invalid credentials. Please try again (handleLogin)');
         }
     };
