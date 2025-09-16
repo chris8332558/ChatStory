@@ -2,7 +2,10 @@ import apiClient from "./client";
 
 export async function getPresignedUrl(room_id: string, content_type: string) {
     const res = await apiClient.post('/stories/presigned-url', { room_id, content_type });
-    return res.data as { upload_url: string; media_url: string };
+    console.log('stories.ts: getPresignedUrl()');
+    console.log('stories.js: res.data: ', res.data);
+    // return res.data as { upload_url: string; media_url: string };
+    return res.data
 };
 
 export async function createStory(payload: {

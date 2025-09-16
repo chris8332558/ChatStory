@@ -27,7 +27,7 @@ export type Message = {
 
 export default function ChatScreen() {
     // Get room id and room name from the file path (e.g. /chat/123?room_name=General)
-    const { room_id, room_name } = useLocalSearchParams<{ room_id: string; room_name?: string }>();
+    const { room_id, room_name } = useLocalSearchParams<{ room_id: string; room_name: string }>();
     const [ messages, setMessages ] = useState<Message[]>([]);
     const [ currentMessage, setCurrentMessage ] = useState('');
     const [ loadingHistory, setLoadingHistory ] = useState(false);
@@ -151,6 +151,8 @@ export default function ChatScreen() {
             <View style={styles.inputContainer}>
                 <TextInput style={styles.input} value={currentMessage} onChangeText={setCurrentMessage} placeholder="Type a message..." returnKeyType="send" onSubmitEditing={handleSendMesssage}/>
                 <Button title="Send" onPress={handleSendMesssage} />
+                <Button title="PS" onPress={() => router.push(`/chat/${room_id}/post-story`)}/>
+                <Button title="SS" onPress={() => router.push(`/chat/${room_id}/stories`)}/>
                 <Button title="< Back" onPress={() => router.back()} />
                 <Button title="Add Member" onPress={() => setAddMemberModalVisible(true)} />
             </View>
