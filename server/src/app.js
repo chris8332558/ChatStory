@@ -6,6 +6,7 @@ const authRoutes = require('./api/authRoutes');
 const roomRoutes = require('./api/roomRoutes');
 const messageRoutes = require('./api/messageRoutes');
 const membershipRoutes = require('./api/membershipRoutes');
+const storyRoutes = require('./api/storyRoutes');
 
 
 // This line creates an instance of an Express application. 
@@ -33,6 +34,7 @@ app.use('/api/rooms/:room_id/members', membershipRoutes);
 // app.use('/api/rooms/invites/redeem', membershipRoutes); 
 // In messageRoutes.js, need to have 'const router = express.Router({ mergeParams: true });' so the child router will be able to see the parents' params, e.g. room_id here
 // e.g. can access req.params.room_id to know which room is being addressed.
+app.use('/api/stories', storyRoutes);
 
 // Simple health check route
 // When a request hits this endpoint, the callback function (req, res) => {...} is executed, 

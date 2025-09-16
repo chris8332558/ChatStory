@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 // The next() is a special function. When called, it passes control to the next middleware or route handler in the chain, e.g. roomRoutes.
 module.exports = function (req, res, next) {
     console.log('auth: enter auth middleware');
-    // Get token from header, which is added from client
+    // Get token from header, which is added from client interceptor
     const token = req.header('x-auth-token');
 
     // Check if not token
@@ -22,7 +22,7 @@ module.exports = function (req, res, next) {
         // and decodes the token and return its original payload.
         // The token is created in authContoller::login
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded.user; // Add the user payload to the request object
+        req.user = decoded.user; // Add the user payload to the request object, so the controllers can use req.user.id to get the user id
         console.log(`auth: decoded jwt token: req.user.id: ${req.user.id}, req.user.username: ${req.user.username}`);
         next(); // The next middleware will be able to use req.user.id, e.g. in roomController.createRoom()
     } catch (err) {

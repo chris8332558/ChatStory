@@ -3,7 +3,7 @@ const Room = require('../models/postgres/room');
 exports.addMember = async (req, res) => {
     const { room_id } = req.params;
     const { email } = req.body;
-    const actor_id = req.user.id;
+    const actor_id = req.user.id; // set in auth middleware
 
     console.log(`membershipController.js: addMember`);
     console.log(`room_id: ${room_id}, email: ${email}, actor_id: ${actor_id}`);
