@@ -19,7 +19,7 @@ router.post('/', storyController.createStory);
 
 
 // Reads
-// router.get('/rooms/:room_id/active', storyController.getActive);
-// router.get('/rooms/:room_id/active', storyController.getArchive);
+router.get('/rooms/:room_id/active', storyController.listActive);
+router.get('/rooms/:room_id/archive', storyController.listArchive);
 
 module.exports = router;
