@@ -67,5 +67,62 @@ exports.createStory = async (req, res) => {
 };
 
 
-// exports.listActive
-// exports.listArchive
+exports.listActive = async (req, res) => {
+    try {
+        const { room_id } = req.params;
+        const user_id = req.user.id;
+
+        const isMember = await Room.isMember({ user_id, room_id });
+        if (!isMember) {
+            return res.status(403).json({ message: "stroyController.js: Not a room member "});
+        }
+
+        const stories = await StoryModel.listActiveByRoom({ room_id });
+        return res.json(stories.map(s => ({
+            id: s._id,
+            user_id: s.user_id,
+            username: s.username,
+            media_url: s.media_url,
+            media_type: s.media_type, // e.g. image/jepg or video/mp4
+            duration_ms: s.duration_ms,
+            created_at: s.created_at,
+            expires_at: s.expires_at,
+        })));
+    } catch (err) {
+        console.error('storyController.js: listActive error: ', err);
+        return res.status(500).json({ message: "storyController.js: Server error" });
+    }
+};
+
+
+exports.listArchive = async (req, res) => {
+    try {
+        const { room_id } = req.params;
+        const { before, limit } = req.body;
+        const user_id = req.user.id;
+
+        const isMember = await Room.isMember({ user_id, room_id });
+        if (!isMember) {
+            return res.status(403).json({ message: "stroyController.js: Not a room member "});
+        }
+
+        const stories = await StoryModel.listArchiveByRoom(
+            { room_id, before, limit: Math.min(parseInt(limit || '50', 10), 200) }
+        );
+
+        return res.json(stories.map(s => ({
+            id: s._id,
+            user_id: s.user_id,
+            username: s.username,
+            media_url: s.media_url,
+            media_type: s.media_type, // e.g. image/jepg or video/mp4
+            duration_ms: s.duration_ms,
+            created_at: s.created_at,
+            expires_at: s.expires_at,
+        })));
+
+    } catch (err) {
+        console.error('storyController.js: listArchive error: ', err);
+        return res.status(500).json({ message: "storyController.js: Server error" });
+    }
+};
