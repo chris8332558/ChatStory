@@ -74,7 +74,14 @@ export default function RoomStories() {
 
     if (!currentStory) {
         console.log("stories.tsx: No Active Stories");
-        return <View style={styles.center}><Text>No Active Stories.</Text></View>
+        return (
+        <View style={styles.center}>
+            <View style={styles.header}>
+                <Button title="Back" onPress={() => router.back() } />
+            </View>
+            <Text>No Active Stories.</Text>
+        </View>
+        )
     }
     else {
         console.log("stories.tsx: setStories(), stories.length: ", stories.length);

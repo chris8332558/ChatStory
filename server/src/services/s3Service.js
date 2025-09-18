@@ -22,7 +22,7 @@ async function getPresignedUploadUrl({ key, content_type, expires_in = 60 * 5}) 
         Key: key, // The object's path in the bucket
         ContentType: content_type, // The MIME type
         // ACL: 'private', // Set the Access Control List to private, meaning the uploaded object isn't publicly accessible by default (requires authentication or signed URLs for access)
-        ACL: 'public-read', // Set the Access Control List to private, meaning the uploaded object isn't publicly accessible by default (requires authentication or signed URLs for access)
+        // ACL: 'public-read', // Set the Access Control List to private, meaning the uploaded object isn't publicly accessible by default (requires authentication or signed URLs for access)
     });
 
     // Generates a presigned URL using the S3 client and command; this URL is a temporary link (valid for expiresIn seconds) 

@@ -86,6 +86,7 @@ export default function PostStory() {
 
     return (
     <View style={styles.container}>
+        <Button title='back' onPress={() => router.back()} />
         { isLoading ? (
             <>
             <ActivityIndicator size='large' />
