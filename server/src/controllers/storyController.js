@@ -21,6 +21,7 @@ exports.getPresigned = async (req, res) => {
 
         // crypto: Node.js built-in module for generating random bytes, used here to create unique file names to avoid collisions
         // extract the file extension from content_type (e.g. 'jpeg' from 'image/jpeg')
+        // key: A unique s3 key to be used as the object path
         const ext = content_type.includes('/') ? content_type.split('/')[1] : 'bin';
         const key = `rooms/${room_id}/stories/${user_id}/${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${ext}`;
 
