@@ -7,7 +7,8 @@ import { router, useLocalSearchParams } from "expo-router";
 import  { io, Socket } from 'socket.io-client'; // Talk to the WebSocket server
 import { useContext, useEffect, useRef, useState } from "react";
 import apiClient from "../../src/api/client";
-import { ActivityIndicator, FlatList, Button, View, Text, StyleSheet, TextInput, KeyboardAvoidingView, Alert, Modal } from "react-native";
+import { ActivityIndicator, FlatList, Button, View, Text, StyleSheet, TextInput, Keyboard, KeyboardAvoidingView, Platform, Alert, Modal, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import ui from '../../src/ui/shared';
 import { fetchRoomMessages } from "../../src/api/messages";
 import { addUserToRoom } from "../../src/api/members";
@@ -135,45 +136,60 @@ export default function ChatScreen() {
     }
 
     return (
-        <KeyboardAvoidingView style={styles.container} keyboardVerticalOffset={90}>
-            <FlatList
-                inverted // Shows latest messages at the bottom
-                data={messages}
-                renderItem={({ item }) => (
-                <View style={styles.messageBubble}>
-                    <Text style={styles.messageUser}>{item.username}</Text>
-                    <Text style={styles.messageText}>{item.text}</Text>
+        <SafeAreaProvider>
+            <SafeAreaView style={styles.container}>
+                <View style={{backgroundColor: 'lightgrey', justifyContent: 'space-between', flexDirection: 'row', alignItems: 'flex-start', padding: 10, borderBottomWidth: 3, borderBottomColor: 'black'}}>
+                    <Button title="<" onPress={() => router.back()} />
+                    <Button title="Add Member" onPress={() => setAddMemberModalVisible(true)} />
                 </View>
-                )}
-                keyExtractor={(item) => item._id?.toString() || `${item.created_at}-${item.user_id}`}
-                style={styles.messageList}
-            />
-            <View style={styles.inputContainer}>
-                <TextInput style={styles.input} value={currentMessage} onChangeText={setCurrentMessage} placeholder="Type a message..." returnKeyType="send" onSubmitEditing={handleSendMesssage}/>
-                <Button title="Send" onPress={handleSendMesssage} />
-                <Button title="PS" onPress={() => router.push(`/chat/${room_id}/post-story`)}/>
-                <Button title="SS" onPress={() => router.push(`/chat/${room_id}/stories`)}/>
-                <Button title="< Back" onPress={() => router.back()} />
-                <Button title="Add Member" onPress={() => setAddMemberModalVisible(true)} />
-            </View>
+                <View style={{backgroundColor: 'skyblue', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', padding: 10, borderBottomWidth: 3, borderBottomColor: 'black'}}>
+                    <Button title="Stories" onPress={() => router.push(`/chat/${room_id}/stories`)}/>
+                    <Button title="+" onPress={() => router.push(`/chat/${room_id}/post-story`)}/>
+                </View>
 
-            <Modal visible={addMemberModalVisible} animationType="slide" transparent={true}>
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Add Member</Text>
-                        <TextInput style={styles.input} placeholder="Enter User Email" value={emailToAdd} onChangeText={setEmailToAdd}/>
-                        <Button title="Add" onPress={handleAddMember}/>
-                        <Button title="Cancel" onPress={() => setAddMemberModalVisible(false)} color="red" />
+                <FlatList
+                    inverted // Shows latest messages at the bottom
+                    data={messages}
+                    renderItem={({ item }) => (
+                    <View style={styles.messageBubble}>
+                        <Text style={styles.messageUser}>{item.username}</Text>
+                        <Text style={styles.messageText}>{item.text}</Text>
                     </View>
-                </View>
-            </Modal>
-        </KeyboardAvoidingView>
+                    )}
+                    keyExtractor={(item) => item._id?.toString() || `${item.created_at}-${item.user_id}`}
+                    style={styles.messageList}
+                />
+
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} >
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
+                        <View style={styles.inputContainer}>
+                            <TextInput style={styles.input} value={currentMessage} onChangeText={setCurrentMessage} placeholder="Type a message..." returnKeyType="send" onSubmitEditing={handleSendMesssage}/>
+                            <Button title="Send" onPress={handleSendMesssage} />
+                        </View>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
+
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss} >
+                    <Modal visible={addMemberModalVisible} animationType="slide" transparent={true}>
+                        <View style={styles.modalContainer}>
+                            <View style={styles.modalContent}>
+                                <Text style={styles.modalTitle}>Add Member</Text>
+                                <TextInput style={styles.input} placeholder="Enter User Email" value={emailToAdd} onChangeText={setEmailToAdd}/>
+                                <Button title="Add" onPress={handleAddMember}/>
+                                <Button title="Cancel" onPress={() => setAddMemberModalVisible(false)} color="red" />
+                            </View>
+                        </View>
+                    </Modal>
+                </TouchableWithoutFeedback>
+            </SafeAreaView>
+        </SafeAreaProvider>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        justifyContent: 'center',
         backgroundColor: ui.colors.bg,
     },
 
@@ -214,7 +230,7 @@ const styles = StyleSheet.create({
     },
 
     input: {
-        //flex: 1,
+        flex: 1,
         height: 44,
         borderWidth: 1,
         borderColor: ui.colors.input,

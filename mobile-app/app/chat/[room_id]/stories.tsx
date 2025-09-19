@@ -2,7 +2,7 @@ import { useEvent } from "expo";
 import { listActiveStories } from "../../../src/api/stories";
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 import { Text, View, Button, Image, StyleSheet, ActivityIndicator, TouchableWithoutFeedback, Dimensions } from "react-native";
 
@@ -119,12 +119,12 @@ export default function RoomStories() {
                 <View style={styles.content}>
                     {isVideo ? (
                         <VideoView 
-                            style={StyleSheet.absoluteFill}
                             player={player}
                             contentFit='cover'
                         />
                     ) : (
                         <Image source={{ uri: currentStory.media_url }} style={StyleSheet.absoluteFill} resizeMode="cover"/>
+                        // <Image source={{ uri: currentStory.media_url }} resizeMode='center' />
                     )}
                     <View style={styles.header}>
                         <Button title="Back" onPress={() => router.back() } />
