@@ -15,6 +15,7 @@ const BUCKET = process.env.S3_BUCKET;
 
 // key (the unique path/filename in the bucket, e.g., 'uploads/image.jpg')
 // contentType (MIME type, e.g., 'image/jpeg' or 'video/mp4')
+// TODO: Now the bucket is public access for easy use, need to change to private later
 async function getPresignedUploadUrl({ key, content_type, expires_in = 60 * 5}) {
     console.log('s3Service.js: Start getPresignedUploadUrl()');
     const cmd = new PutObjectCommand({

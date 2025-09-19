@@ -1,9 +1,12 @@
+import { useEvent } from "expo";
 import { listActiveStories } from "../../../src/api/stories";
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
-import { Text, View, Button, Image, StyleSheet, ActivityIndicator } from "react-native";
+import { Text, View, Button, Image, StyleSheet, ActivityIndicator, TouchableWithoutFeedback, Dimensions } from "react-native";
+
+const { width, height } = Dimensions.get('window');
 
 export type Story = {
     room_id: string,
@@ -23,6 +26,8 @@ export default function RoomStories() {
     const [ isLoading, setIsLoading ] = useState(false);
     const currentStory = stories[idx];
     // TODO: Add video using expo-video
+
+    const isVideo = !!currentStory && currentStory.media_type.startsWith('video/');
 
     // Setup stories when enter a room
     useEffect(() => {
@@ -44,6 +49,20 @@ export default function RoomStories() {
     }, [room_id]);
 
     // TODO: Auto advance for images
+    const onNext = useCallback(() => {
+        if (idx < stories.length - 1) {
+            setIdx(i => i + 1);
+        } else {
+            router.back();
+        }
+    }, [idx, stories.length]);
+    
+    const onPrev = () => {
+        if (idx > 0) {
+            setIdx(i => i - 1);
+        }
+    };
+
     useEffect(() => {
         if (!currentStory) return;
         if (currentStory.media_type.startsWith('image/')) {
@@ -52,21 +71,23 @@ export default function RoomStories() {
             }, currentStory.duration_ms || 5000);
             return () => clearTimeout(t);
         }
-    }, [currentStory?.id]);
+    }, [currentStory, onNext]);
 
-    const onNext = () => {
-        if (idx < stories.length - 1) {
-            setIdx(i => i + 1);
-        } else {
-            router.back();
-        }
-    };
 
-    const onPrev = () => {
-        if (idx > 0) {
-            setIdx(i => i - 1);
+    const player = useVideoPlayer(currentStory?.media_url ?? null, (player) => {
+        player.loop = false;
+        player.play();
+    });
+
+    const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing });
+    useEffect(() => {
+        if (!isVideo) return;
+        const duration = player.duration ?? 0;
+        const currentTime = player.currentTime ?? 0;
+        if (!isPlaying && duration > 0 && currentTime >= duration - 0.25) {
+            onNext();
         }
-    };
+    }, [isPlaying, player.currentTime, player.duration, isVideo, onNext]);
 
     if (isLoading) {
         return <View style={styles.center}><ActivityIndicator size={'large'} /></View>
@@ -84,22 +105,35 @@ export default function RoomStories() {
         )
     }
     else {
-        console.log("stories.tsx: setStories(), stories.length: ", stories.length);
+        console.log(`stories.tsx: setStories(), ${idx+1}/${stories.length}`);
         console.log('sotries.tsx: currentStory: ', currentStory);
     }
 
+
     return (
         <View style={styles.container}>
-            <View style={styles.content}>
-                <Image source={{ uri: currentStory.media_url }} style={StyleSheet.absoluteFill} resizeMode="cover"/>
-            </View>
-            <View style={styles.header}>
-                <Button title="Back" onPress={() => router.back() } />
-                <Text style={styles.username}>{currentStory.username}</Text>
-            </View>
+            <TouchableWithoutFeedback onPress={(e) => {
+                const x = e.nativeEvent.locationX;
+                if (x < width / 2) onPrev(); else onNext();
+            }}>
+                <View style={styles.content}>
+                    {isVideo ? (
+                        <VideoView 
+                            style={StyleSheet.absoluteFill}
+                            player={player}
+                            contentFit='cover'
+                        />
+                    ) : (
+                        <Image source={{ uri: currentStory.media_url }} style={StyleSheet.absoluteFill} resizeMode="cover"/>
+                    )}
+                    <View style={styles.header}>
+                        <Button title="Back" onPress={() => router.back() } />
+                        <Text style={styles.username}>{currentStory.username}</Text>
+                    </View>
+                </View>
+            </TouchableWithoutFeedback>
         </View>
-    )
-
+    );
 };
 
 const styles = StyleSheet.create({
