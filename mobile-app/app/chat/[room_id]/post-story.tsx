@@ -37,7 +37,6 @@ export default function PostStory() {
         const isVideo = (asset.type || '').includes('video') || (asset.duration && asset.duration > 0);
         console.log('post-story.tsx: asset: ', asset);
         console.log('post-story.tsx: isVideo: ', isVideo);
-        // TODO: the type is wrong now (image becomes .mp4)
         const content_type = asset.mimeType || (isVideo ? 'video/mp4' : 'image/jpeg');
         console.log('post-story.tsx: content_type: ', content_type);
 

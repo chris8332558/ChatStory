@@ -48,7 +48,7 @@ const StoryModel = {
         const db = getDB();
         const filter = { room_id };
         if (before) {
-            filter.create_at = { $lt: new Date(before) };
+            filter.created_at = { $lt: new Date(before) };
         }
         const item = await db
             .collection(ARCHIVE_COLLECTION)

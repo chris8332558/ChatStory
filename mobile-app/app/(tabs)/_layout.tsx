@@ -5,10 +5,9 @@ import { Tabs } from 'expo-router';
 export default function TabsLayout() {
   return (
     <Tabs>
-      <Tabs.Screen name="home" options={{ title: 'Home' }} />
+      <Tabs.Screen name="home" options={{ title: 'Messages' }} />
+      <Tabs.Screen name="friends" options={{ title: 'Friends' }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
     </Tabs>
   );
 }
-
-//<Tabs.Screen name="profile" options={{ title: 'Profile' }} />

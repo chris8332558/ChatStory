@@ -139,8 +139,12 @@ export default function ChatScreen() {
         <SafeAreaProvider>
             <SafeAreaView style={styles.container}>
                 <View style={{backgroundColor: 'lightgrey', justifyContent: 'space-between', flexDirection: 'row', alignItems: 'flex-start', padding: 10, borderBottomWidth: 3, borderBottomColor: 'black'}}>
-                    <Button title="<" onPress={() => router.back()} />
-                    <Button title="Add Member" onPress={() => setAddMemberModalVisible(true)} />
+                    <View style={{flexDirection: 'row', flex: 1 }}>
+                        <Button title="<" onPress={() => router.back()} />
+                        <Text style={styles.roomName}>{room_name}</Text>
+                    </View>
+                    <Button title="Add" onPress={() => setAddMemberModalVisible(true)} />
+                    <Button title="Archive" onPress={() => router.push(`/chat/${room_id}/stories-archive`)} />
                 </View>
                 <View style={{backgroundColor: 'skyblue', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', padding: 10, borderBottomWidth: 3, borderBottomColor: 'black'}}>
                     <Button title="Stories" onPress={() => router.push(`/chat/${room_id}/stories`)}/>
@@ -174,7 +178,7 @@ export default function ChatScreen() {
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
                                 <Text style={styles.modalTitle}>Add Member</Text>
-                                <TextInput style={styles.input} placeholder="Enter User Email" value={emailToAdd} onChangeText={setEmailToAdd}/>
+                                <TextInput style={styles.modalInput} placeholder="Enter User Email" value={emailToAdd} onChangeText={setEmailToAdd}/>
                                 <Button title="Add" onPress={handleAddMember}/>
                                 <Button title="Cancel" onPress={() => setAddMemberModalVisible(false)} color="red" />
                             </View>
@@ -191,6 +195,13 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         backgroundColor: ui.colors.bg,
+    },
+
+    roomName: {
+        fontSize: 25,
+        fontWeight:'400', 
+        color: ui.colors.primary,
+        paddingLeft: 20,
     },
 
     messageBubble: {
@@ -231,7 +242,7 @@ const styles = StyleSheet.create({
 
     input: {
         flex: 1,
-        height: 44,
+        height: 40,
         borderWidth: 1,
         borderColor: ui.colors.input,
         borderRadius: ui.radii.md,
@@ -243,6 +254,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: ui.colors.overlay,
         justifyContent: 'center',
+        flexDirection: 'column',
         paddingHorizontal: 20,
     },
 
@@ -259,5 +271,14 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: ui.colors.text,
         marginBottom: ui.spacing.md,
+    },
+
+    modalInput: {
+        height: 40,
+        borderWidth: 1,
+        borderColor: ui.colors.input,
+        borderRadius: ui.radii.md,
+        paddingHorizontal: 12,
+        backgroundColor: ui.colors.white,
     },
 });

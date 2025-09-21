@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useState, useEffect, useCallback } from "react";
 
-import { Text, View, Button, Image, StyleSheet, ActivityIndicator, TouchableWithoutFeedback, Dimensions } from "react-native";
+import { Text, View, Button, Image, StyleSheet, ActivityIndicator, TouchableWithoutFeedback, Dimensions, Alert } from "react-native";
 
 const { width, height } = Dimensions.get('window');
 
@@ -25,8 +25,6 @@ export default function RoomStories() {
     const [ stories, setStories ] = useState<Story[]>([]);
     const [ isLoading, setIsLoading ] = useState(false);
     const currentStory = stories[idx];
-    // TODO: Add video using expo-video
-
     const isVideo = !!currentStory && currentStory.media_type.startsWith('video/');
 
     // Setup stories when enter a room
@@ -41,6 +39,8 @@ export default function RoomStories() {
                 }
             } catch (err) {
                 // show fallback
+                Alert.alert('Error', 'Failed to get stories');
+                console.error('stories.tsx: listActiveStories error: ', err);
             } finally {
                 if (mounted) { setIsLoading(false); }
             }
@@ -119,12 +119,12 @@ export default function RoomStories() {
                 <View style={styles.content}>
                     {isVideo ? (
                         <VideoView 
+                            style={styles.video}
                             player={player}
-                            contentFit='cover'
+                            contentFit='contain'
                         />
                     ) : (
-                        <Image source={{ uri: currentStory.media_url }} style={StyleSheet.absoluteFill} resizeMode="cover"/>
-                        // <Image source={{ uri: currentStory.media_url }} resizeMode='center' />
+                        <Image source={{ uri: currentStory.media_url }} style={StyleSheet.absoluteFill} resizeMode="contain"/>
                     )}
                     <View style={styles.header}>
                         <Button title="Back" onPress={() => router.back() } />
@@ -147,7 +147,11 @@ const styles = StyleSheet.create({
         backgroundColor: 'black',
     },
     content: {
-        flex: 1
+        flex: 1,
+    },
+    video: {
+        height: height,
+        width: width
     },
     header: {
         position: 'absolute',

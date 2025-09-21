@@ -20,7 +20,7 @@ const { MongoClient } = require('mongodb');
     // Active stories TTL (Time-To-Live): expire after 24hr from created_at
     // Automatically deletes stories from the StoriesActive collection after 24 hours based on their created_at timestamp. 
     await db.collection('StoriesActive').createIndex(
-        { create_at: 1 }, // 1 means ascending order
+        { created_at: 1 }, // 1 means ascending order
         { expireAfterSeconds: 86400 } // 24 * 60 * 60
     );
 

@@ -1,15 +1,15 @@
 // The index.js file acts as a gatekeeper. It checks the authentication status and 
 // immediately redirects the user to the appropriate starting screen.
 
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import AuthContext from "../src/context/AuthContext";
 import { Redirect } from 'expo-router';
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { StyleSheet } from "react-native";
 
 // Defines the screen component. It receives the navigation prop from React Navigation, which allows it to move to other screens.
 export default function Index() {
     const { userToken, isLoading } = useContext(AuthContext);
-    console.log('Render Index: index: isLoading=', isLoading, 'userToken=', !!userToken)
+    console.log('app/index.tsx: isLoading=', isLoading, 'userToken=', !!userToken)
 
     // CRITICAL: This redirect should trigger every time userToken changes
     if (userToken) {

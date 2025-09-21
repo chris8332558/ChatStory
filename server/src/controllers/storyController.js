@@ -108,7 +108,7 @@ exports.listActive = async (req, res) => {
 exports.listArchive = async (req, res) => {
     try {
         const { room_id } = req.params;
-        const { before, limit } = req.body;
+        const { before, limit } = req.query;
         const user_id = req.user.id;
 
         const isMember = await Room.isMember({ user_id, room_id });
@@ -117,7 +117,7 @@ exports.listArchive = async (req, res) => {
         }
 
         const stories = await StoryModel.listArchiveByRoom(
-            { room_id, before, limit: Math.min(parseInt(limit || '50', 10), 200) }
+            { room_id, before, limit: Math.min(parseInt(limit || '50', 10), 50) }
         );
 
         return res.json(stories.map(s => ({
