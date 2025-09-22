@@ -8,9 +8,9 @@ import ui from '../../../src/ui/shared';
 export default function StoriesArchive() {
     const { room_id } = useLocalSearchParams<{ room_id: string }>();
     const [done, setDone] = useState(false);
-    const [cursor, setCursor] = useState<string | null>((new Date()).toString());
+    const [cursor, setCursor] = useState<string>((new Date()).toString());
     const [archives, setArchives] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     
 
     const load = useCallback(async () => {
@@ -19,8 +19,11 @@ export default function StoriesArchive() {
             console.log(`stories-archive.tsx: done: ${done}`);
             return;
         }
+        if (isLoading) return;
+        setIsLoading(true);
         try {
-            const data = await listArchiveStories(room_id as string, cursor || undefined, 30);
+            console.log(`stories-archive.tsx: load(): cursor=${cursor}`);
+            const data = await listArchiveStories(room_id as string, cursor, 6);
             console.log(`stories-archive.tsx: Get archive stories: ${data.length}`);
             console.log(`stories-archive.tsx: cursor: ${cursor}`);
             setArchives(prev => [...prev, ...data]);
@@ -35,7 +38,7 @@ export default function StoriesArchive() {
         } finally {
             setIsLoading(false);
         }
-    }, [cursor, room_id, done]);
+    }, [cursor, room_id, isLoading, done]);
 
     useEffect(() => {
         load();

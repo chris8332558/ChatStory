@@ -23,7 +23,7 @@ export async function listActiveStories(room_id: string) {
     return res.data;
 };
 
-export async function listArchiveStories(room_id: string, before?: string, limit = 50) {
+export async function listArchiveStories(room_id: string, before: string, limit = 50) {
     const res = await apiClient.get(`/stories/rooms/${room_id}/archive`, { params: { before, limit }});
     return res.data;
 };

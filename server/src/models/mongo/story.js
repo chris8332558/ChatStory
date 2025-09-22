@@ -45,6 +45,7 @@ const StoryModel = {
     },
 
     async listArchiveByRoom({ room_id, before, limit=100 }) {
+        console.log(`story.js: listArchiveByRoom: before=${before}, limit=${limit}`);
         const db = getDB();
         const filter = { room_id };
         if (before) {
