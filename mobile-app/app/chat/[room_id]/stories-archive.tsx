@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback } from "react";
 import { View, Text, Button, Alert, Image, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import ui from '../../../src/ui/shared';
-import { } from "@react-navigation/elements";
 
 export default function StoriesArchive() {
     const { room_id } = useLocalSearchParams<{ room_id: string }>();
@@ -21,7 +20,7 @@ export default function StoriesArchive() {
             return;
         }
         try {
-            const data = await listArchiveStories(room_id as string, cursor || undefined, 4);
+            const data = await listArchiveStories(room_id as string, cursor || undefined, 30);
             console.log(`stories-archive.tsx: Get archive stories: ${data.length}`);
             console.log(`stories-archive.tsx: cursor: ${cursor}`);
             setArchives(prev => [...prev, ...data]);
@@ -55,13 +54,13 @@ export default function StoriesArchive() {
                     renderItem={({item}) => (
                         <TouchableOpacity 
                             style={styles.cell} 
-                            onPress={() => router.push(`/chat/${room_id}/stories?fromArchive=1`)}
+                            onPress={() => router.push(`/chat/${room_id}/stories`)}
                         >
                             <Image source={{uri: item.media_url }} style={styles.thumb} />
                         </TouchableOpacity>
                     )}
                     onEndReachedThreshold={0.6}
-                    // onEndReached={load}
+                    onEndReached={load}
                     ListFooterComponent={isLoading ? <ActivityIndicator /> : null}
                     ListEmptyComponent={!isLoading ? <Text style={{ textAlign: 'center', marginTop: 24 }}>Empty Stroy Archive</Text> : null}
                 />          

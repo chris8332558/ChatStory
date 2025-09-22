@@ -3,10 +3,11 @@ import { listActiveStories } from "../../../src/api/stories";
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useState, useEffect, useCallback } from "react";
+import ui from "../../../src/ui/shared";
 
 import { Text, View, Button, Image, StyleSheet, ActivityIndicator, TouchableWithoutFeedback, Dimensions, Alert } from "react-native";
 
-const { width, height } = Dimensions.get('window');
+const { height, width} = Dimensions.get('screen');
 
 export type Story = {
     room_id: string,
@@ -99,8 +100,8 @@ export default function RoomStories() {
         <View style={styles.center}>
             <View style={styles.header}>
                 <Button title="Back" onPress={() => router.back() } />
+                <Text style={{flex: 1, color: 'black'}}>No Active Stories.</Text>
             </View>
-            <Text>No Active Stories.</Text>
         </View>
         )
     }
@@ -141,6 +142,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: ui.colors.bg
     },
     container: {
         flex: 1,

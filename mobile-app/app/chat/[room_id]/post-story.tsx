@@ -1,12 +1,82 @@
 import { router, useLocalSearchParams } from "expo-router";
-import { View, Text, Button, Alert, StyleSheet, ActivityIndicator } from "react-native"
+import { View, Text, Button, Alert, StyleSheet, ActivityIndicator, Dimensions } from "react-native"
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from "react";
 import { createStory, getPresignedUrl } from "../../../src/api/stories";
 
+const { height, width } = Dimensions.get('screen');
+
 export default function PostStory() {
     const { room_id } = useLocalSearchParams<{ room_id: string }>();
     const [isLoading, setIsLoading] = useState(false);
+
+    const useCamera = async () => {
+
+        // if (ImagePicker.getCameraPermissionsAsync())
+        const camPerm = await ImagePicker.requestCameraPermissionsAsync();
+        if (camPerm.status !== 'granted') {
+            Alert.alert('Permission Required', 'Camera access is required');
+        }
+
+        const result = await ImagePicker.launchCameraAsync({
+            allowsEditing: true,
+            mediaTypes: ['images', 'videos', 'livePhotos'],
+            videoMaxDuration: 30,
+            aspect: [width, height]
+        });
+
+        if (result.canceled) return;
+        console.log('post-story.tsx: Succefully use camera to take a picture/video');
+
+        const asset = result.assets[0];
+        const uri = asset.uri;
+        const isVideo = (asset.type || '').includes('video') || (asset.duration && asset.duration > 0);
+        console.log('post-story.tsx: asset: ', asset);
+        console.log('post-story.tsx: isVideo: ', isVideo);
+        const content_type = asset.mimeType || (isVideo ? 'video/mp4' : 'image/jpeg');
+        console.log('post-story.tsx: content_type: ', content_type);
+
+        setIsLoading(true);
+        try {
+            // 1. Get presigned url
+            const { upload_url, media_url } = await getPresignedUrl(room_id as string, content_type);
+            console.log('post-story.tsx: Successfully getPresignedUrl');
+            console.log('post-story.tsx: upload_url: ', upload_url);
+            console.log('post-story.tsx: media_url: ', media_url);
+
+            // 2. Upload file to s3 with PUT
+            // Retrieve the local file. fileResp is a response object containing the file data
+            const fileResp = await fetch(uri);
+            // Convert the object into a Blob object, which represent the raw file data in a format suitable for upload (e.g. binary data)
+            const blob = await fileResp.blob();
+            const put = await fetch(upload_url, {
+                method: 'PUT',
+                headers: { 'Content-Type': content_type },
+                body: blob,
+            });
+            if (!put.ok) {
+                throw new Error("Upload to s3 failed");
+            }
+            console.log('post-story.tsx: Successfully upload file to s3');
+
+            // 3. Create story
+            console.log('post-story.tsx: Start createStory()');
+            await createStory({
+                room_id: room_id as string,
+                media_url: media_url,
+                media_type: content_type,
+                duration_ms: !isVideo ? 5000 : 0,
+            });
+
+            Alert.alert('Success', 'Story posted');
+            router.back(); // Go back to the last screen
+        } catch (err: any) {
+            Alert.alert('Error', err?.message || 'Failed to upload story');
+            console.error('post-story.tsx: pickAndUpload error: ', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const pickAndUpload = async () => {
         if (!room_id) {
@@ -21,11 +91,12 @@ export default function PostStory() {
             return;
         }
 
+
         // Choose the media
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images', 'videos', 'livePhotos'],
             allowsEditing: true,
-            aspect: [4, 3],
+            aspect: [width, height], // On iOS, the crop rectangle is always a square
             quality: 1,
         });
 
@@ -92,7 +163,10 @@ export default function PostStory() {
             <Text style={ styles.uploadingText }>Uploading...</Text>
             </>
         ) : (
+            <>
             <Button title='Pick media and post story' onPress={pickAndUpload} />
+            <Button title='Open Camera' onPress={useCamera} />
+            </>
         ) }
     </View>
     )
