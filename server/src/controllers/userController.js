@@ -8,7 +8,7 @@ exports.getMe = async (req, res) => {
         console.log('userController.js: Start getMe()');
         await client.query('BEGIN');
         const r = await client.query(
-            'SELECT user_id, username, email, created_at FROM Users WHERE user_id = $1',
+            'SELECT user_id, username, email, created_at, display_name FROM Users WHERE user_id = $1',
             [user_id]
         );
         if (r.rowCount == 0) {
@@ -29,20 +29,21 @@ exports.getMe = async (req, res) => {
 exports.updateMe = async (req, res) => {
     try {
         const user_id = req.user.id;
-        const { username, email } = req.body; // Patch: partial fields
+        const { username, email, display_name } = req.body; // Patch: partial fields
         const fields = [];
         const values = [];
         let i = 1;
 
         if (username != undefined) { fields.push(`username = $${i++}`); values.push(username)};
         if (email != undefined) { fields.push(`email = $${i++}`); values.push(email)};
+        if (display_name != undefined) { fields.push(`display_name = $${i++}`); values.push(display_name)};
 
         if (fields.length === 0) return res.status(400).json({ message: 'No changes provided '});
 
         values.push(user_id);
 
         // 'UPDATE Users SET username, email WHERE user_id = 1 RETURN user_id, username, email, created_at';
-        const sql = `UPDATE Users SET ${fields.join(', ')} WHERE user_id = $${i} RETURNING user_id, username, email, created_at`;
+        const sql = `UPDATE Users SET ${fields.join(', ')} WHERE user_id = $${i} RETURNING user_id, username, email, created_at, display_name`;
         const r = await pgPool.query(sql, values);
         return res.json(r.rows[0]);
     } catch (err) {

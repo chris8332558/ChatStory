@@ -1,5 +1,17 @@
 import apiClient from "./client";
 
+export type StoryType = {
+    _id: string,
+    room_id: string,
+    user_id: string,
+    username: string,
+    media_url: string,
+    media_type: string, // e.g. image/jepg or video/mp4
+    duration_ms: number,
+    created_at: string,
+    expires_at: string,
+};
+
 export async function getPresignedUrl(room_id: string, content_type: string) {
     const res = await apiClient.post('/stories/presigned-url', { room_id, content_type });
     console.log('stories.ts: getPresignedUrl()');
@@ -20,10 +32,20 @@ export async function createStory(payload: {
 
 export async function listActiveStories(room_id: string) {
     const res = await apiClient.get(`/stories/rooms/${room_id}/active`);
-    return res.data;
+    return res.data as StoryType[];
 };
 
 export async function listArchiveStories(room_id: string, before: string, limit = 50) {
     const res = await apiClient.get(`/stories/rooms/${room_id}/archive`, { params: { before, limit }});
-    return res.data;
+    return res.data as StoryType[];
+};
+
+export async function listMyActiveStories() {
+    const res = await apiClient.get(`/stories/me/active`);
+    return res.data as StoryType[];
+};
+
+export async function listMyArchiveStories(before: string, limit = 50) {
+    const res = await apiClient.get(`/stories/me/archive`, { params: { before, limit }});
+    return res.data as StoryType[];
 };

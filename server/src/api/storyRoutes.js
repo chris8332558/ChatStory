@@ -22,4 +22,7 @@ router.post('/', storyController.createStory);
 router.get('/rooms/:room_id/active', storyController.listActive);
 router.get('/rooms/:room_id/archive', storyController.listArchive);
 
+router.get('/me/active', storyController.listMineActive);
+router.get('/me/archive', storyController.listMineArchive);
+
 module.exports = router;

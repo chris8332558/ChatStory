@@ -1,5 +1,5 @@
 import { useEvent } from "expo";
-import { listActiveStories } from "../../../src/api/stories";
+import { listActiveStories, StoryType } from "../../../src/api/stories";
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useState, useEffect, useCallback } from "react";
@@ -9,21 +9,10 @@ import { Text, View, Button, Image, StyleSheet, ActivityIndicator, TouchableWith
 
 const { height, width} = Dimensions.get('screen');
 
-export type Story = {
-    room_id: string,
-    user_id: string,
-    username: string,
-    media_url: string,
-    media_type: string, // e.g. image/jepg or video/mp4
-    duration_ms: number,
-    created_at: string,
-    expires_at: string,
-};
-
 export default function RoomStories() {
     const { room_id } = useLocalSearchParams<{ room_id: string }>();
     const [ idx, setIdx ] = useState(0);
-    const [ stories, setStories ] = useState<Story[]>([]);
+    const [ stories, setStories ] = useState<StoryType[]>([]);
     const [ isLoading, setIsLoading ] = useState(false);
     const currentStory = stories[idx];
     const isVideo = !!currentStory && currentStory.media_type.startsWith('video/');

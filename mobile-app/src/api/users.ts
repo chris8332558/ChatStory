@@ -5,6 +5,7 @@ export type Me = {
     username: string,
     email: string,
     created_at: string, // ISO string
+    display_name: string,
 }
 
 export async function getMe() {
@@ -13,7 +14,7 @@ export async function getMe() {
 };
 
 // Pass any subset of those two fields (username and email), and eaxh is optaionl
-export async function updateMe(patch: Partial<Pick<Me, 'username' | 'email'>>) {
+export async function updateMe(patch: Partial<Pick<Me, 'username' | 'email' | 'display_name'>>) {
     const res = await apiClient.patch('users/me', patch);
     return res.data as Me;
 };

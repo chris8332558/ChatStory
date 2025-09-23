@@ -19,7 +19,7 @@ export default function ProfileScreen() {
         (async () => {
             try {
                 const u = await getMe();
-                setForm({ username: u.username, email: u.email });
+                setForm({ username: u.username, email: u.email, display_name: u.display_name });
             } catch (err: any) {
                 Alert.alert('Error', err?.message || 'Failed to load profile');
             }
@@ -32,6 +32,7 @@ export default function ProfileScreen() {
             const updated = await updateMe({
                 username: form.username,
                 email: form.email,
+                display_name: form.display_name,
             });
             setMe(updated);
             Alert.alert('Saved', 'Profile updated');
@@ -52,16 +53,20 @@ export default function ProfileScreen() {
         <SafeAreaProvider>
             <SafeAreaView style={styles.container}>
                 <View style={styles.header}>
-                    <Text style={styles.title}>Profile</Text>
 
                     <View style={styles.formRow}>
                         <Text style={styles.label}>Username</Text>
-                        <TextInput style={styles.input} value={form.username || ''} onChangeText={(t) => setForm(s => ({ ...s, username: t }))} />
+                        <Text style={styles.constant}>{form.username}</Text>
                     </View>
 
                     <View style={styles.formRow}>
                         <Text style={styles.label}>Email</Text>
-                        <TextInput style={styles.input} value={form.email || ''} keyboardType='email-address' onChangeText={(t) => setForm(s => ({ ...s, email: t }))} />
+                        <Text style={styles.constant}>{form.email}</Text>
+                    </View>
+
+                    <View style={styles.formRow}>
+                        <Text style={styles.label}>Name</Text>
+                        <TextInput style={styles.input} value={form.display_name|| ''} onChangeText={(t) => setForm(s => ({ ...s, display_name: t }))} />
                     </View>
 
                     <Button title={saving ? 'Saving...' : 'Save'} onPress={onSave} disabled={saving} />
@@ -104,5 +109,6 @@ const styles = StyleSheet.create({
     title: { fontSize: 22, fontWeight: '700', marginBottom: 12 },
     formRow: { marginBottom: 10 },
     label: { fontSize: 12, color: '#64748b', marginBottom: 4 },
+    constant: {paddingVertical: 10, height: 40, fontSize: 20, fontWeight: '700' },
     input: { borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 8, paddingHorizontal: 10, height: 40, backgroundColor: 'white'},
 });

@@ -60,6 +60,40 @@ const StoryModel = {
 
         return item;
     },
+
+    async listActiveByUser({ user_id, limit = 100 }) {
+        console.log(`story.js: listActiveByUser: limit=${limit}`);
+        const db = getDB();
+        const filter = { user_id };
+        if (before) {
+            filter.created_at = { $lt: new Date(before) };
+        }
+        const item = await db
+            .collection(ACTIVE_COLLECTION)
+            .find(filter)
+            .sort({ created_at: -1 })
+            .limit(limit)
+            .toArray();
+
+        return item;
+    },
+
+    async listArchiveByUser({ user_id, before, limit=100 }) {
+        console.log(`story.js: listArchiveByUser: before=${before}, limit=${limit}`);
+        const db = getDB();
+        const filter = { user_id };
+        if (before) {
+            filter.created_at = { $lt: new Date(before) };
+        }
+        const item = await db
+            .collection(ARCHIVE_COLLECTION)
+            .find(filter)
+            .sort({ created_at: -1 })
+            .limit(limit)
+            .toArray();
+
+        return item;
+    },
 }
 
 module.exports = StoryModel;
