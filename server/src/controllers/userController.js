@@ -1,4 +1,4 @@
-const { pgPool } = require('../../config/index');
+const { pgPool } = require('../config/index');
 
 exports.getMe = async (req, res) => {
     const client = await pgPool.connect();
@@ -7,7 +7,7 @@ exports.getMe = async (req, res) => {
     try { 
         console.log('userController.js: Start getMe()');
         await client.query('BEGIN');
-        const r= await client.query(
+        const r = await client.query(
             'SELECT user_id, username, email, created_at FROM Users WHERE user_id = $1',
             [user_id]
         );
@@ -16,7 +16,7 @@ exports.getMe = async (req, res) => {
         }
 
         await client.query('COMMIT')
-        return res.json(result.rows[0]);
+        return res.json(r.rows[0]);
 
     } catch (err) {
         await client.query('ROLLBACK');
@@ -42,7 +42,7 @@ exports.updateMe = async (req, res) => {
         values.push(user_id);
 
         // 'UPDATE Users SET username, email WHERE user_id = 1 RETURN user_id, username, email, created_at';
-        const sql = `UPDATE Users SET ${fields.join(', ')} WHERE user_id = $${i} RETURN user_id, username, email, created_at`;
+        const sql = `UPDATE Users SET ${fields.join(', ')} WHERE user_id = $${i} RETURNING user_id, username, email, created_at`;
         const r = await pgPool.query(sql, values);
         return res.json(r.rows[0]);
     } catch (err) {
