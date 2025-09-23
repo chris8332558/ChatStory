@@ -10,26 +10,17 @@ import apiClient from "../../src/api/client";
 import { ActivityIndicator, FlatList, Button, View, Text, StyleSheet, TextInput, Keyboard, KeyboardAvoidingView, Platform, Alert, Modal, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import ui from '../../src/ui/shared';
-import { fetchRoomMessages } from "../../src/api/messages";
+import { fetchRoomMessages, MessageType } from "../../src/api/messages";
 import { addUserToRoom } from "../../src/api/members";
 
 // apiClient.getUri() returns 'http://10.1.16.172:3000/api'
 // Points at the Socket.IO server
 const SOCKET_URL = apiClient.getUri().replace(/\/api$/, ''); // get rid of the '/api'
 
-export type Message = {
-    _id: string;
-    room_id: string;
-    user_id: string;
-    username: string;
-    text: string;
-    created_at: string;
-};
-
 export default function ChatScreen() {
     // Get room id and room name from the file path (e.g. /chat/123?room_name=General)
     const { room_id, room_name } = useLocalSearchParams<{ room_id: string; room_name: string }>();
-    const [ messages, setMessages ] = useState<Message[]>([]);
+    const [ messages, setMessages ] = useState<MessageType[]>([]);
     const [ currentMessage, setCurrentMessage ] = useState('');
     const [ loadingHistory, setLoadingHistory ] = useState(false);
 
@@ -87,7 +78,7 @@ export default function ChatScreen() {
         });
 
         // Listen for incoming message
-        s.on('receiveMessage', (msg: Message) => {
+        s.on('receiveMessage', (msg: MessageType) => {
             setMessages(preMessages => [msg, ...preMessages]);
         });
 
