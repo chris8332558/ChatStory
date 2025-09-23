@@ -49,7 +49,7 @@ export default function RoomStories() {
         return () => { mounted = false; };
     }, [room_id]);
 
-    // TODO: Auto advance for images
+    // Auto advance
     const onNext = useCallback(() => {
         if (idx < stories.length - 1) {
             setIdx(i => i + 1);

@@ -1,7 +1,7 @@
 import { listArchiveStories } from "../../../src/api/stories";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, Button, Alert, Image, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, Button, Alert, Modal, Image, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import ui from '../../../src/ui/shared';
 
@@ -44,6 +44,7 @@ export default function StoriesArchive() {
         load();
     }, [load]);
 
+
     return (
         <SafeAreaProvider>
             <SafeAreaView style={{flex: 1}}>
@@ -63,10 +64,11 @@ export default function StoriesArchive() {
                         </TouchableOpacity>
                     )}
                     onEndReachedThreshold={0.6}
-                    onEndReached={load}
+                    onEndReached={() => { if (!isLoading && !done) load(); }}
                     ListFooterComponent={isLoading ? <ActivityIndicator /> : null}
                     ListEmptyComponent={!isLoading ? <Text style={{ textAlign: 'center', marginTop: 24 }}>Empty Stroy Archive</Text> : null}
                 />          
+    
             </SafeAreaView>
         </SafeAreaProvider>
     );
