@@ -65,9 +65,6 @@ const StoryModel = {
         console.log(`story.js: listActiveByUser: limit=${limit}`);
         const db = getDB();
         const filter = { user_id };
-        if (before) {
-            filter.created_at = { $lt: new Date(before) };
-        }
         const item = await db
             .collection(ACTIVE_COLLECTION)
             .find(filter)

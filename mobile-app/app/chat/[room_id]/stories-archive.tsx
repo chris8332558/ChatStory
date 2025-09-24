@@ -8,7 +8,7 @@ import ui from '../../../src/ui/shared';
 export default function StoriesArchive() {
     const { room_id } = useLocalSearchParams<{ room_id: string }>();
     const [done, setDone] = useState(false);
-    const [cursor, setCursor] = useState<string>((new Date()).toString());
+    const [cursor, setCursor] = useState<string>((new Date()).toISOString());
     const [archives, setArchives] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     
