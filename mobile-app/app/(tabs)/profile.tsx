@@ -127,13 +127,9 @@ export default function ProfileScreen() {
                             </View>
 
 
-                            {/* <View style={{ height: 12 }}>
-                                <TouchableOpacity onPress={() => router.push('/settings')}>
-                                    <Text style={styles.link}>Setting</Text>
-                                </TouchableOpacity>
-                            </View> */}
-
-                            <Text style={styles.link}>Setting</Text>
+                            <TouchableOpacity onPress={() => router.push('/setting')}>
+                                <Text style={styles.link}>Setting</Text>
+                            </TouchableOpacity>
 
                             <Text style={styles.section}>Active Stories</Text>
 
