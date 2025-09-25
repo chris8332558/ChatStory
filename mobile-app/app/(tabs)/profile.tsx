@@ -1,8 +1,9 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { View, Button, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import AuthContext from '../../src/context/AuthContext';
-import { getMe, Me, updateMe } from "../../src/api/users";
+import { getMe, Me, updateMe, getAvatarPresignedUrl } from "../../src/api/users";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { listMyActiveStories, listMyArchiveStories, StoryType } from "../../src/api/stories";
 import ui from '../../src/ui/shared';
@@ -16,6 +17,7 @@ export default function ProfileScreen() {
     const [archiveCursor, setArchiveCursor] = useState<string>(new Date().toISOString());
     const [archiveLoading, setArchiveLoading] = useState(false);
     const [archiveDone, setArchiveDone] = useState(false);
+    const [updatingAvatar, setUpdatingAvatar] = useState(false);
 
     const router = useRouter(); 
     const { logout } = useContext(AuthContext);
@@ -24,12 +26,18 @@ export default function ProfileScreen() {
         (async () => {
             try {
                 const u = await getMe();
-                setForm({ username: u.username, email: u.email, display_name: u.display_name });
+                console.log(`profile.tsx: getMe(), avatar_url: ${u.avatar_url}`);
+                setForm({ username: u.username, email: u.email, display_name: u.display_name, avatar_url: u.avatar_url });
             } catch (err: any) {
                 Alert.alert('Error', err?.message || 'Failed to load profile');
             }
         })();
     }, []);
+
+    useEffect(() => {
+        console.log('profile.tsx: avatar_url updated:', form.avatar_url);
+    }, [form.avatar_url]);
+
 
     useEffect(() => {
         (async () => {
@@ -62,6 +70,68 @@ export default function ProfileScreen() {
         }
     };
 
+    const onChangeAvatar = async () => {
+        const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (perm.status !== 'granted') {
+            Alert.alert('Permission Required', 'Camera access is required');
+        } 
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            allowsEditing: true,
+            mediaTypes: ['images'],
+            aspect: [1, 1],
+        });
+
+        if (result.canceled) return;
+        console.log('profile.tsx: Succefully picked a image');
+
+        const asset = result.assets[0];
+        const uri = asset.uri;
+        console.log('post-story.tsx: asset: ', asset);
+        const content_type = asset.mimeType || 'image/jpeg';
+        console.log('post-story.tsx: content_type: ', content_type);
+        
+        setUpdatingAvatar(true);
+        try {
+            // 1. Get avatar presigned url
+            const { upload_url, media_url }= await getAvatarPresignedUrl(content_type);
+            console.log('profile.tsx: Successfully getPresignedUrl');
+            console.log('profile.tsx: upload_url: ', upload_url);
+            console.log('profile.tsx: media_url: ', media_url);
+
+            // 2. Upload file to s3 with PUT
+            // Retrieve the local file. fileResp is a response object containing the file data
+            const fileResp = await fetch(uri);
+            // Convert the object into a Blob object, which represent the raw file data in a format suitable for upload (e.g. binary data)
+            const blob = await fileResp.blob();
+            const put = await fetch(upload_url, {
+                method: 'PUT',
+                headers: { 'Content-Type': content_type },
+                body: blob,
+            });
+            if (!put.ok) {
+                throw new Error("Upload to s3 failed");
+            }
+            console.log('profile.tsx: Successfully upload file to s3');
+
+            const nextForm = { ...form, avatar_url: media_url };
+            setForm(nextForm);
+            const updated = await updateMe({
+                username: nextForm.username,
+                email: nextForm.email,
+                display_name: nextForm.display_name,
+                avatar_url: nextForm.avatar_url,
+            });
+
+            setMe(updated);
+            Alert.alert('Saved', 'Profile updated');
+        } catch (err: any) {
+            Alert.alert('Error', err?.message || 'Failed to udpate profile');
+        } finally {
+            setUpdatingAvatar(false);
+        }
+    };
+
     const onSave = async() => {
         setSaving(true);
         try {
@@ -69,6 +139,7 @@ export default function ProfileScreen() {
                 username: form.username,
                 email: form.email,
                 display_name: form.display_name,
+                avatar_url: form.avatar_url,
             });
             setMe(updated);
             Alert.alert('Saved', 'Profile updated');
@@ -107,6 +178,12 @@ export default function ProfileScreen() {
                 <FlatList 
                     ListHeaderComponent={
                         <View style={styles.header}>
+                            <TouchableOpacity onPress={onChangeAvatar} style={{ alignSelf: 'center', marginBottom: 12 }}>
+                                <Image 
+                                    source={form?.avatar_url ? { uri: form.avatar_url} : require('../../assets/images/Avatar_Placeholder.png') }
+                                    style={{ width: 96, height: 96, borderRadius: 48 }}
+                                />
+                            </TouchableOpacity>
 
                             <View style={styles.formRow}>
                                 <Text style={styles.label}>Username</Text>
