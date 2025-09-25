@@ -7,7 +7,7 @@ import * as SecureStore from 'expo-secure-store';
 // Find LAN IP (in terminal): networksetup -getinfo Wi-Fi | grep "IP address"
 
 // const API_BASE_URL = 'http://192.168.10.122:3000/api';
-const API_BASE_URL = 'http://10.93.165.240:3000/api';
+const API_BASE_URL = 'http://192.168.4.80:3000/api';
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,

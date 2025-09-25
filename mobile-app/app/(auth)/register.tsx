@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { Alert, View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { Alert, View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router'; // Use Link for navigation
 import AuthContext from "../../src/context/AuthContext";
 import { isAxiosError } from 'axios';
@@ -8,6 +8,7 @@ export default function RegisterScreen() {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const {register, isLoading } = useContext(AuthContext);
 
     const handleRegister = async() => {
@@ -51,8 +52,13 @@ export default function RegisterScreen() {
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
-            secureTextEntry
+            secureTextEntry={!showPassword}
         />
+
+        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Text>{showPassword ? 'Hide' : 'Show'}</Text>
+        </TouchableOpacity>
+
         <Button title={isLoading ? "Please wait..." : "Register"} onPress={handleRegister} disabled={isLoading} />
         <Link href="/login" style={styles.link}>
             Already have an account? Log in

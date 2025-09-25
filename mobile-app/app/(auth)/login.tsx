@@ -1,12 +1,13 @@
 import React, { useState, useContext } from "react";
 import { Link } from 'expo-router';
-import { View, TextInput, Button, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity } from "react-native";
 import AuthContext from '../../src/context/AuthContext';
 
 // Defines the screen component. It receives the navigation prop from React Navigation, which allows it to move to other screens.
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const { login, isLoading } = useContext(AuthContext);
 
     // Triggered when the Login button is pressed
@@ -43,10 +44,15 @@ export default function LoginScreen() {
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
-            secureTextEntry // A prop used on the password field to obscure the text with dots.
+            secureTextEntry={!showPassword} // A prop used on the password field to obscure the text with dots.
             autoCorrect={false}
             textContentType="password"
             />
+
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Text>{showPassword ? 'Hide' : 'Show'}</Text>
+            </TouchableOpacity>
+
 
             <Button title={isLoading ? "Please wait..." : "Login"} onPress={handleLogin} disabled={isLoading} />
             <Link href="/register" style={styles.link}>Do not have an account? Sign up</Link>
