@@ -7,7 +7,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import  { io, Socket } from 'socket.io-client'; // Talk to the WebSocket server
 import { useContext, useEffect, useRef, useState } from "react";
 import apiClient from "../../src/api/client";
-import { ActivityIndicator, FlatList, Button, View, Text, StyleSheet, TextInput, Keyboard, KeyboardAvoidingView, Platform, Alert, Modal, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
+import { ActivityIndicator, FlatList, Button, View, Text, StyleSheet, TextInput, Keyboard, KeyboardAvoidingView, Platform, Alert, Modal, TouchableWithoutFeedback } from "react-native";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import ui from '../../src/ui/shared';
 import { fetchRoomMessages, MessageType } from "../../src/api/messages";
@@ -112,7 +112,7 @@ export default function ChatScreen() {
             return;
         }
         try {
-            const res = await addUserToRoom(room_id as string, { email: emailToAdd.trim() });
+            await addUserToRoom(room_id as string, { email: emailToAdd.trim() });
             Alert.alert('Success', `User added (${emailToAdd})`);
             setEmailToAdd('');
         } catch (err) {

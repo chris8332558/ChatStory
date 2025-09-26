@@ -1,7 +1,7 @@
 import { listArchiveStories } from "../../../src/api/stories";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState, useCallback } from "react";
-import { View, Text, Button, Alert, Modal, Image, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, Button, Alert, Image, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import ui from '../../../src/ui/shared';
 
