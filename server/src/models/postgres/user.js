@@ -21,9 +21,19 @@ const User = {
     // If no user with that email exists, result.rows will be an empty array, 
     // and this function will return undefined, which is the correct behavior.
     async findByEmail(email) {
-        const result = await pgPool.query('SELECT * FROM Users WHERE email = $1', [email]);
-        return result.rows[0]; // (username, email, password_hash)
+        const result = await pgPool.query('SELECT * FROM Users WHERE LOWER(email) = LOWER($1)', [email]);
+        return result.rows[0]; // (user_id, username, email, password_hash, created_at, display_name, avatar_url)
     },
+
+    async findByUsername(username) {
+        const result = await pgPool.query('SELECT * FROM Users WHERE LOWER(username) = LOWER($1)', [username]);
+        return result.rows[0]; // (user_id, username, email, password_hash, created_at, display_name, avatar_url)
+    },
+
+    async findById(user_id) {
+        const result = await pgPool.query('SELECT * FROM Users WHERE user_id = $1', [user_id]);
+        return result.rows[0]; // (user_id, username, email, password_hash, created_at, display_name, avatar_url)
+    }
 };
 
 module.exports = User;

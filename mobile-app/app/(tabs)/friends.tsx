@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { View, Button, Text, FlatList, StyleSheet, Alert, ActivityIndicator, TextInput, Image } from 'react-native';
-import { acceptRequest, listFriends, listRequests, rejectRequest, sendRequest } from "../../src/api/friends";
+import { acceptRequest, listFriends, deleteFriend, listRequests, rejectRequest, sendRequest } from "../../src/api/friends";
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function FriendsScreen() {
     const [friends, setFriends] = useState<any[]>([]);
     const [requests, setRequests] = useState<{ incoming: any[], outgoing: any[] }>({ incoming: [], outgoing: [] });
     const [isLoading, setIsLoading] = useState(false);
-    const [to_user_id, set_to_user_id] = useState<string>('');
+    const [requestIdentifirer, setRequestIdentifier] = useState<string>(''); // Can be user_id, email, or useranme
 
     async function load() {
         setIsLoading(true);
@@ -31,20 +31,29 @@ export default function FriendsScreen() {
     }, []);
 
     // TODO: get the reciver id. Need to use backend instead
-    function getReciverId(r: any) {
+    function getReceiverId(r: any) {
         return r.requestor === 1 ? r.uid2 : r.uid1;
     }
 
     async function onSendRequest() {
-        if (!to_user_id.trim()) {
-            Alert.alert('Error', 'Enter email to send frient request');
+        const v = requestIdentifirer.trim();
+        console.log(`friends.tsx: onSendRequest: v=${v}`);
+        if (!v) {
+            Alert.alert('Error', 'Enter user_id, email, or username to send frient request');
             return;
         } 
 
         try {
-            await sendRequest(to_user_id.trim());
+            if (v.includes('@')) {
+                console.log(`friends.tsx: sendRequest by email ${v}`);
+                await sendRequest({ email: v });
+            } else if (/^[a-z0-9._-]{3,}$/i.test(v)) {
+                await sendRequest({ username: v });
+            } else {
+                await sendRequest({ to_user_id: v });
+            }
             Alert.alert('Success', 'Friend request sent');
-            set_to_user_id('');
+            setRequestIdentifier('');
             load();
         } catch (err: any) {
             Alert.alert('Error', err?.message || 'Failed to send request.');
@@ -69,6 +78,15 @@ export default function FriendsScreen() {
         }
     }
 
+    async function onDeleteFriend(friend_id: string) {
+        try {
+            await deleteFriend(friend_id);
+            load();
+        } catch (err: any) {
+            Alert.alert('Error', err?.message || 'Failed to delete friend.');
+        }
+    }
+
     if (isLoading) {
         return (
             <ActivityIndicator size="large" style={{flex: 1, justifyContent: 'center', alignItems: 'center'}} />
@@ -84,9 +102,10 @@ export default function FriendsScreen() {
                             <Text style={styles.title}>Friends</Text>
                             <View>
                                 <TextInput 
-                                    placeholder="Enter user id to send request"
-                                    value={to_user_id}
-                                    onChangeText={set_to_user_id}
+                                    placeholder="Enter user_id, email, or username to send request"
+                                    value={requestIdentifirer}
+                                    onChangeText={setRequestIdentifier}
+                                    autoCapitalize="none"
                                     style={styles.input}
                                 />
                                 <Button title="Send Friend Request" onPress={onSendRequest} />
@@ -109,7 +128,7 @@ export default function FriendsScreen() {
                             {requests.outgoing.length === 0 ? <Text style={styles.subtle}>No outgoing requests</Text> : null}
                             {requests.outgoing.map((r) => (
                                 <View key={r.request_id} style={styles.reqRow}>
-                                    <Text style={styles.reqText}>{getReciverId(r)}</Text>
+                                    <Text style={styles.reqText}>{getReceiverId(r)}</Text>
                                 </View>
                             ))}
 
@@ -123,9 +142,10 @@ export default function FriendsScreen() {
                     renderItem={({ item }) => (
                         <View style={styles.friendRow}>
                             <Image source={{ uri: item.avatar_url || 'https://www.gravatar.com/avatar?d=mp' }} style={styles.avatar} />
-                            <View style={{ flex: 1 }}>
+                            <View style={{ flex: 1, flexDirection: 'column' }}>
                                 <Text style={styles.name}>{item.display_name}</Text>
                                 <Text style={styles.subtle}>{item.username}</Text>
+                                <Button title="Delete" color="#ef4444" onPress={() => onDeleteFriend(item.user_id)} />
                             </View>
                         </View>
                     )}

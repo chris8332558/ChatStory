@@ -10,8 +10,9 @@ export async function listRequests() {
     return res.data as { incoming: any[], outgoing: any[] };
 }
 
-export async function sendRequest(to_user_id: string) {
-    const res = await apiClient.post('friends/requests', { to_user_id });
+export async function sendRequest(opts: {to_user_id?: string, email?: string, username?: string}) {
+    console.log('friends.ts: sendRequest with opts:', opts);
+    const res = await apiClient.post('friends/requests', opts);
     return res.data;
 }
 
@@ -22,5 +23,10 @@ export async function acceptRequest(request_id: string) {
 
 export async function rejectRequest(request_id: string) {
     const res = await apiClient.post(`friends/requests/${request_id}/reject`);
+    return res.data;
+}
+
+export async function deleteFriend(friend_id: string) {
+    const res = await apiClient.delete(`friends/${friend_id}`);
     return res.data;
 }

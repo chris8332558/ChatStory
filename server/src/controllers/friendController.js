@@ -1,26 +1,48 @@
+const { get } = require('../app');
 const { pgPool } = require('../config');
+const User = require('../models/postgres/user');
 
 function normPair(from, to) {
     return from < to ? [from, to , 1] : [to, from, 2]; // requestor 1 means uid1 sent, 2 means uid2 sent
 }
 
+async function getTargetId({ to_user_id, email, username}) {
+    if (to_user_id) {
+        const u = await User.findById(to_user_id);
+        return u?.user_id || null;
+    }
+    if (email) {
+        const u = await User.findByEmail(email);
+        return u?.user_id|| null;
+    }
+    if (username) {
+        const u = await User.findByUsername(username);
+        return u?.user_id|| null;
+    }
+    return null;
+}
+
 exports.sendRequest = async (req, res) => {
     const from = req.user.id; // Assuming req.user is set by authentication middleware
-    const { to_user_id }  = req.body;
-    if (!to_user_id || to_user_id === from) return res.status(400).json({ message: 'Invalid to_user_id'});
+    const { to_user_id, email, username }  = req.body;
+    console.log(`friendController.js: sendRequest: from ${from} to_user_id ${to_user_id}, email ${email}, username ${username}`);
+    if (to_user_id === from) return res.status(400).json({ message: 'Invalid to_user_id'});
 
     const client = await pgPool.connect();
     try {
+        const target_id = await getTargetId({ to_user_id, email, username });
+        console.log(`friendController.js: sendRequest: from ${from} to ${target_id}`);
         await client.query('BEGIN');
 
         // Check if there's already a existing friendship
-        const fr = await client.query('SELECT 1 FROM Friends WHERE user_id = $1 AND friend_id = $2', [from, to_user_id]);
+        const fr = await client.query('SELECT 1 FROM Friends WHERE user_id = $1 AND friend_id = $2', [from, target_id]);
         if (fr.rows.length > 0) {
             await client.query('ROLLBACK');
+            console.log('friendController.js: Already friends');
             return res.status(400).json({ message: 'Already friends'});
         }
 
-        const [uid1, uid2, requestor] = normPair(from, to_user_id);
+        const [uid1, uid2, requestor] = normPair(from, target_id);
         await client.query(
             `INSERT INTO friend_requests (uid1, uid2, requestor)
              VALUES ($1, $2, $3)
@@ -153,8 +175,8 @@ exports.listFriends = async (req, res) => {
             WHERE f.user_id = $1
             ORDER BY u.username ASC`,
             [user_id]
-        )
-        return res.json(r.rows)
+        );
+        return res.json(r.rows);
     } catch (err) {
         console.error('friendController.js: Error in listFriends', err);
         return res.status(500).json({ error: err.message })
@@ -162,5 +184,42 @@ exports.listFriends = async (req, res) => {
 };
 
 exports.deleteFriend = async (req, res) => {
+    try {
+        const user_id = req.user.id; // Assuming req.user is set by authentication middleware
+        const { friend_id } = req.params;
+
+        const client = await pgPool.connect();
+        await client.query('BEGIN');
+        try {
+            // Delete both directions
+            await client.query(
+                `DELETE FROM Friends 
+                WHERE (user_id = $1 AND friend_id = $2) 
+                OR (user_id = $2 AND friend_id = $1)`,
+                [user_id, friend_id]
+            );
+
+            // Also delete any pending friend requests between the two users
+            await client.query(
+                `DELETE FROM friend_requests
+                WHERE (uid1 = $1 AND uid2 = $2) OR (uid1 = $2 AND uid2 = $1)`,
+                [user_id, friend_id]
+            )
+
+            await client.query('COMMIT');
+
+            // 204 keeps DELETE idempotent-friendly even if nothing was removed
+            return res.status(204).send();
+        } catch (err) {
+            await client.query('ROLLBACK');
+            throw err;
+        } finally {
+            client.release();
+        }
+
+    } catch (err) {
+        console.error('friendController.js: Error in deleteFriend', err);
+        return res.status(500).json({ error: err.message })
+    }
 
 };
