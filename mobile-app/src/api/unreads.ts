@@ -8,9 +8,9 @@ export async function fetchUnreads(): Promise<UnreadItem[]> {
 }
 
 export async function markRoomRead(room_id: string): Promise<void> {
-    await apiClient.post(`/unreads/rooms/${room_id}/read`);
+    await apiClient.patch(`/unreads/rooms/${room_id}/read`);
 }
 
 export async function markStoriesSeen(room_id: string): Promise<void> {
-    await apiClient.post(`/unreads/stories/rooms/${room_id}/seen`);
+    await apiClient.patch(`/unreads/stories/rooms/${room_id}/seen`);
 }

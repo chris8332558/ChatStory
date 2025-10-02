@@ -8,7 +8,8 @@ import apiClient from "../../src/api/client";
 const SOCKET_URL = apiClient.getUri().replace(/\/api$/, ''); // get rid of the '/api'
 
 function Badge({ count }: { count: number }) {
-  if (!count) return null;
+  // if (!count) return null;
+  console.log(`_layout.tsx: Unread badge count: ${count}`);
   return (
     <View style={{ position: 'absolute', top: -4, right: -10, backgroundColor: 'red', borderRadius: 10, minWidth: 18, height: 18, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center'}}>
       <Text style={{ color: 'white', fontSize: 11, fontWeight: '700' }}>{count > 99 ? '99+' : count}</Text>

@@ -12,6 +12,8 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import ui from '../../src/ui/shared';
 import { fetchRoomMessages, MessageType } from "../../src/api/messages";
 import { addUserToRoom } from "../../src/api/members";
+import { markRoomRead } from "../../src/api/unreads";
+import { useUnreads } from "@/src/state/useUnreads";
 
 // apiClient.getUri() returns 'http://10.1.16.172:3000/api'
 // Points at the Socket.IO server
@@ -28,6 +30,7 @@ export default function ChatScreen() {
     const [ addMemberModalVisible, setAddMemberModalVisible] = useState(false);
     const { userToken } = useContext(AuthContext); // We can get user id and user name from the userToken (user.id, user.username)
     const socketRef = useRef<Socket | null>(null); // Holds the live Socker.IO client instance across renders (useRef avoids reconnecting on every render)
+    const { refresh } = useUnreads(SOCKET_URL); // useUnreads hook to refresh unread counts
 
     // Fetch historical messages over HTTP
     useEffect(() => {
@@ -52,6 +55,14 @@ export default function ChatScreen() {
         };
         fetchMessageHistory();
         return () => { mounted = false };
+    }, [room_id]);
+
+    // Mark room as read when entering the room
+    useEffect(() => {
+        if (room_id) {
+            // Optimistic: fire and forget, then refresh unreads
+            markRoomRead(room_id as string).then(() => refresh());
+        }
     }, [room_id]);
 
     // Manage WebSocket connection

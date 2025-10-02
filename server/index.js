@@ -92,6 +92,14 @@ io.on('connection', (socket) => {
             const newSeq = seqRes.rows[0].msg_seq;
             console.log(`server/index: socket.on(sendMessage): New message saved with _id: ${saved._id} in room_id: ${room_id}, newSeq: ${newSeq}`);
 
+            await pgPool.query(`
+                INSERT INTO User_Room_State (user_id, room_id, last_read_seq)
+                VALUES ($1, $2, $3)
+                ON CONFLICT (user_id, room_id) 
+                DO UPDATE SET last_read_seq = GREATEST(User_Room_State.last_read_seq, EXCLUDED.last_read_seq)`, 
+                [user_id, room_id, newSeq]);
+             
+
             // fit the structure of Message in room_id.tsx
             const msg = {
                 _id: saved._id,
@@ -102,12 +110,13 @@ io.on('connection', (socket) => {
                 created_at: saved.created_at,
             };
 
-            // Broadcast the message to everyone in the room except the sender
+            // Broadcast the message to everyone in the room
             // This is the broadcasting logic. It sends the 'receiveMessage' event to all users in the specified room except the sender. This prevents the sender from receiving their own message twice
             io.to(room_id).emit('receiveMessage', { msg, newSeq }); // client will listen to 'receiveMessage' to get new message
 
             // Emitting a small “bump” event keeps socket traffic minimal and defers unread computation to a single GET /api/unreads call on the client, which simplifies server logic and remains responsive at scale.
-            io.to(room_id).emit('roomUnreadBump', { room_id }); // client can fetch /api/unreads
+            // notify other members in the room to refresh their unread counts (exclude sender)
+            socket.to(room_id).emit('roomUnreadBump', { room_id }); // client can fetch /api/unreads
 
             console.log(`server/index: io.to(receiveMessage): Socker server emit(receiveMessage) to room:${room_id}, text: ${text}`);
         } catch (err) {
