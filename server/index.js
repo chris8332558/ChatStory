@@ -7,6 +7,7 @@ const Room = require('./src/models/postgres/room');
 const Message = require('./src/models/mongo/message');
 const { disconnectMongo } = require('./src/config');
 const { connectToMongo } = require('./src/config');
+const { pgPool } = require('./src/config');
 
 // If the connection fails, the application will exit (as defined in your config/index.js file), 
 // which is good because the app can't run properly without its database.
@@ -69,7 +70,7 @@ io.on('connection', (socket) => {
     })
     
 
-    // When another client sends a message
+    // When another client sends a message.
     // Listens for a custom event called 'sendMessage' from this user's client.
     // The sendMessage will contains { room_id, msg: Message }
     socket.on('sendMessage', async (data) => {
@@ -87,8 +88,12 @@ io.on('connection', (socket) => {
                 room_id, user_id, username, text: text.trim(),
             })
 
+            const seqRes = await pgPool.query(`UPDATE Room_Counters SET msg_seq = msg_seq + 1 WHERE room_id = $1 RETURNING msg_seq`, [room_id]);
+            const newSeq = seqRes.rows[0].msg_seq;
+            console.log(`server/index: socket.on(sendMessage): New message saved with _id: ${saved._id} in room_id: ${room_id}, newSeq: ${newSeq}`);
+
             // fit the structure of Message in room_id.tsx
-            const payload = {
+            const msg = {
                 _id: saved._id,
                 room_id: saved.room_id,
                 user_id: saved.user_id,
@@ -99,7 +104,11 @@ io.on('connection', (socket) => {
 
             // Broadcast the message to everyone in the room except the sender
             // This is the broadcasting logic. It sends the 'receiveMessage' event to all users in the specified room except the sender. This prevents the sender from receiving their own message twice
-            io.to(room_id).emit('receiveMessage', payload);
+            io.to(room_id).emit('receiveMessage', { msg, newSeq }); // client will listen to 'receiveMessage' to get new message
+
+            // Emitting a small “bump” event keeps socket traffic minimal and defers unread computation to a single GET /api/unreads call on the client, which simplifies server logic and remains responsive at scale.
+            io.to(room_id).emit('roomUnreadBump', { room_id }); // client can fetch /api/unreads
+
             console.log(`server/index: io.to(receiveMessage): Socker server emit(receiveMessage) to room:${room_id}, text: ${text}`);
         } catch (err) {
             console.error('sendMessage error:', err);

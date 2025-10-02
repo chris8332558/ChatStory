@@ -9,6 +9,7 @@ const membershipRoutes = require('./api/membershipRoutes');
 const storyRoutes = require('./api/storyRoutes');
 const userRoutes = require('./api/userRoutes');
 const friendRoutes = require('./api/friendRoutes');
+const unreadRoutes = require('./api/unreadRoutes');
 
 
 // This line creates an instance of an Express application. 
@@ -39,6 +40,7 @@ app.use('/api/rooms/:room_id/members', membershipRoutes);
 app.use('/api/stories', storyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/friends', friendRoutes);
+app.use('/api/unreads', unreadRoutes);
 
 // Simple health check route
 // When a request hits this endpoint, the callback function (req, res) => {...} is executed, 

@@ -78,7 +78,9 @@ export default function ChatScreen() {
         });
 
         // Listen for incoming message
-        s.on('receiveMessage', (msg: MessageType) => {
+        s.on('receiveMessage', ({ msg, newSeq }: { msg: MessageType; newSeq: number }) => {
+            // console.log(`[room_id].tsx: s.on(receiveMessage): New message received: ${msg.text}`);
+            console.log(`[room_id].tsx: s.on(receiveMessage): New message received: ${msg.text}, newSeq: ${newSeq}`);
             setMessages(preMessages => [msg, ...preMessages]);
         });
 

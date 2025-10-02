@@ -13,10 +13,11 @@
 // define your navigators and screens inside a component, explicitly listing each screen using <Stack.Screen> 
 // and wrapping everything in a <NavigationContainer>
 
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import AuthContext, { AuthProvider } from '../src/context/AuthContext';
-import { Stack, Slot } from 'expo-router';
+import { router, Slot } from 'expo-router';
 import { View, ActivityIndicator } from "react-native";
+import * as Notifications from 'expo-notifications';
 
 // The <Slot /> component renders the current child route. Expo Router will handle switching 
 // between the (auth) and (tabs) groups based on the logic in our index.js file.
@@ -24,6 +25,17 @@ export default function RootLayout() {
   // Inner component that has access to AuthContext
   function RootLayoutNav() {
     const { userToken, isLoading } = useContext(AuthContext);
+
+    useEffect(() => {
+      const sub = Notifications.addNotificationReceivedListener((resp) => {
+        console.log('_layout.tsx: Notification Received: ', resp);
+        const data = resp.request.content.data as any;
+        if (data?.url) router.push(data.url);
+        else if (data?.room_id) router.push(`/chat/${data.room_id}`)
+      })
+
+      return () => sub.remove();
+    }, []);
 
     // CRITICAL: Show loading while checking auth state
     if (isLoading) {

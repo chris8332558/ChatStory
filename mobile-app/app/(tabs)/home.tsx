@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { router } from 'expo-router';
 import { View, Button, Text, TextInput, StyleSheet, Alert, TouchableOpacity, FlatList, Modal } from 'react-native';
 import apiClient from "../../src/api/client";
-
+import { useUnreads } from '../../src/state/useUnreads';
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import ui from '../../src/ui/shared';
 
 
@@ -12,11 +13,16 @@ interface Room {
     name: string;
 }
 
+const SOCKET_URL = apiClient.getUri().replace(/\/api$/, ''); // get rid of the '/api'
+
 export default function HomeScreen() {
     const [rooms, setRooms] = useState<Room[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [newRoomName, setNewRoomName] = useState('');
 
+    const { counts } = useUnreads(SOCKET_URL);
+
+    // Fetch rooms from the server
     const fetchRooms = useCallback(async () => {
         try {
             const response = await apiClient.get('/rooms');
@@ -47,34 +53,44 @@ export default function HomeScreen() {
         }
     };
 
-    return (
-        <View style={styles.container}>
-            <FlatList 
-                data={rooms}
-                keyExtractor={(item) => item.room_id}
-                renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => router.push(`/chat/${item.room_id}?room_name=${item.name}`)}>
-                        <View style={styles.roomItem}>
-                            <Text style={styles.roomName}>{item.name}</Text>
+    const renderItem = ({ item }: { item: Room }) => {
+        const unread = counts[item.room_id] || 0;
+        return (
+            <TouchableOpacity onPress={() => router.push(`/chat/${item.room_id}?room_name=${item.name}`)}>
+                <View style={styles.roomItem}>
+                    <Text style={styles.roomName}>{item.name}</Text>
+                    {unread > 0 && (
+                        <View style={styles.badge}>
+                            <Text style={styles.badgeText}>{unread > 99 ? '99+' : unread}</Text>
                         </View>
-                    </TouchableOpacity>
-                )}
-                ListHeaderComponent={<Text style={styles.header}>Your Chat Rooms</Text>}
-            />
-            <Button title="Create New Room" onPress={() => setModalVisible(true)} />
-
-            <Modal visible={modalVisible} animationType="slide" transparent={true}>
-                <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>New Room</Text>
-                        <TextInput style={styles.input} placeholder="Enter room name" value={newRoomName} onChangeText={setNewRoomName}/>
-                        <Button title="Create" onPress={handleCreateRoom}/>
-                        <Button title="Cancel" onPress={() => setModalVisible(false)} color="red" />
-                    </View>
+                    )}
                 </View>
-            </Modal>
-            
-        </View>
+            </TouchableOpacity>
+        );
+    };
+
+    return (
+        <SafeAreaProvider>
+            <SafeAreaView style={styles.container}>
+                <FlatList 
+                    data={rooms}
+                    keyExtractor={(item) => item.room_id}
+                    renderItem={renderItem}
+                />
+                <Button title="Create New Room" onPress={() => setModalVisible(true)} />
+
+                <Modal visible={modalVisible} animationType="slide" transparent={true}>
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <Text style={styles.modalTitle}>New Room</Text>
+                            <TextInput style={styles.input} placeholder="Enter room name" value={newRoomName} onChangeText={setNewRoomName}/>
+                            <Button title="Create" onPress={handleCreateRoom}/>
+                            <Button title="Cancel" onPress={() => setModalVisible(false)} color="red" />
+                        </View>
+                    </View>
+                </Modal>
+            </SafeAreaView>
+        </SafeAreaProvider>
     )
 };
 
@@ -144,4 +160,11 @@ const styles = StyleSheet.create({
         backgroundColor: ui.colors.white,
         marginBottom: ui.spacing.md,
     },
+
+    badge: {
+        minWidth: 20, paddingHorizontal: 6, height: 20, borderRadius: 10, backgroundColor: 'red',
+        justifyContent: 'center', alignItems: 'center'
+    },
+
+    badgeText: { color: 'white', fontSize: 12, fontWeight: '700' },
 });
