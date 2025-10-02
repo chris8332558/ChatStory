@@ -103,6 +103,7 @@ export default function FriendsScreen() {
                             <View>
                                 <TextInput 
                                     placeholder="Enter user_id, email, or username to send request"
+                                    placeholderTextColor={'#C0C0C0'}
                                     value={requestIdentifirer}
                                     onChangeText={setRequestIdentifier}
                                     autoCapitalize="none"
@@ -173,6 +174,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         marginBottom: 12,
         paddingHorizontal: 8,
+        
         width: 300,
     },
     friendRow: {

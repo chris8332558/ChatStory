@@ -28,7 +28,7 @@ export default function RootLayout() {
 
     useEffect(() => {
       const sub = Notifications.addNotificationReceivedListener((resp) => {
-        console.log('_layout.tsx: Notification Received: ', resp);
+        // console.log('_layout.tsx: Notification Received: ', resp);
         const data = resp.request.content.data as any;
         if (data?.url) router.push(data.url);
         else if (data?.room_id) router.push(`/chat/${data.room_id}`)
