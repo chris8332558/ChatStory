@@ -5,7 +5,8 @@
 import AuthContext from "../../src/context/AuthContext"; // Read the JWT
 import { router, useLocalSearchParams } from "expo-router";
 import  { io, Socket } from 'socket.io-client'; // Talk to the WebSocket server
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useCallback, useEffect, useRef, useState } from "react";
+import { useFocusEffect } from '@react-navigation/native';
 import apiClient from "../../src/api/client";
 import { ActivityIndicator, FlatList, Button, View, Text, StyleSheet, TextInput, Keyboard, KeyboardAvoidingView, Platform, Alert, Modal, TouchableWithoutFeedback } from "react-native";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
@@ -14,6 +15,8 @@ import { fetchRoomMessages, MessageType } from "../../src/api/messages";
 import { addUserToRoom } from "../../src/api/members";
 import { markRoomRead } from "../../src/api/unreads";
 import { useUnreads } from "@/src/state/useUnreads";
+import { UnreadContext } from '../../src/context/UnreadContext';
+
 
 // apiClient.getUri() returns 'http://10.1.16.172:3000/api'
 // Points at the Socket.IO server
@@ -30,7 +33,20 @@ export default function ChatScreen() {
     const [ addMemberModalVisible, setAddMemberModalVisible] = useState(false);
     const { userToken } = useContext(AuthContext); // We can get user id and user name from the userToken (user.id, user.username)
     const socketRef = useRef<Socket | null>(null); // Holds the live Socker.IO client instance across renders (useRef avoids reconnecting on every render)
-    const { refresh } = useUnreads(SOCKET_URL); // useUnreads hook to refresh unread counts
+    const { markRead, setRoomZero, refresh } = useContext(UnreadContext);
+
+
+    // Focus → mark read immediately when in the room (idempotent, optimistic zero)
+    useFocusEffect(
+        useCallback(() => {
+            console.log('Screen is focused!');
+            if (room_id) {
+                console.log(`Marking room ${room_id} as read on focus`);
+                markRead(room_id as string).finally(refresh);
+            }
+        return () => {};
+        }, [room_id, markRead, refresh])
+    );
 
     // Fetch historical messages over HTTP
     useEffect(() => {
@@ -59,11 +75,11 @@ export default function ChatScreen() {
 
     // Mark room as read when entering the room
     useEffect(() => {
-        if (room_id) {
+        if (!room_id) {
             // Optimistic: fire and forget, then refresh unreads
             markRoomRead(room_id as string).then(() => refresh());
         }
-    }, [room_id]);
+    }, [room_id, refresh]);
 
     // Manage WebSocket connection
     useEffect(() => {
@@ -88,11 +104,20 @@ export default function ChatScreen() {
             s.emit('joinRoom', room_id);
         });
 
+
         // Listen for incoming message
+        let t: any = null;
         s.on('receiveMessage', ({ msg, newSeq }: { msg: MessageType; newSeq: number }) => {
             // console.log(`[room_id].tsx: s.on(receiveMessage): New message received: ${msg.text}`);
             console.log(`[room_id].tsx: s.on(receiveMessage): New message received: ${msg.text}, newSeq: ${newSeq}`);
             setMessages(preMessages => [msg, ...preMessages]);
+
+            if (msg.room_id === room_id) {
+                // Debounce: mark read shortly after receiving to avoid spamming PATCH
+                clearTimeout(t);
+                t = setTimeout(() => { markRead(room_id as string).catch(() => {}); }, 250)
+                console.log(`[room_id].tsx: Debounced markRead for room_id: ${room_id}`);
+            }
         });
 
         s.on('connect_error', (err) => {
@@ -101,12 +126,14 @@ export default function ChatScreen() {
 
         // Discount on connect unmount
         return () => {
+            clearTimeout(t);
             s?.disconnect();
             socketRef.current = null;
         };
-    }, [room_id, userToken]);
+    }, [room_id, userToken, markRead]);
 
-    const handleSendMesssage = () => {
+
+    async function handleSendMesssage() {
         if (!socketRef.current) {
             console.error("[roomId].tsx: socketRef.current is null");
         }
@@ -114,6 +141,8 @@ export default function ChatScreen() {
             const text = currentMessage.trim()
             socketRef.current.emit('sendMessage', { room_id, text });
             //setMessages((prevMessages) => [messageData, ...prevMessages]); // Don't need to setMessages. the s.on('receiveMessage') above will handle this
+            await markRead(room_id as string).catch(() => {}); // Optimistically mark read after sending
+            setRoomZero(room_id as string); // Optimistically set local unread to zero
             setCurrentMessage('');
         }
     };

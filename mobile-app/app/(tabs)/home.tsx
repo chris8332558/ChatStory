@@ -69,6 +69,7 @@ export default function HomeScreen() {
         );
     };
 
+
     return (
         <SafeAreaProvider>
             <SafeAreaView style={styles.container}>

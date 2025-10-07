@@ -1,15 +1,14 @@
 // app/(tabs)/_layout.js
-import React from 'react';
+import React, { useContext } from 'react';
 import { Tabs } from 'expo-router';
 import { View, Text } from 'react-native';
 import { useUnreads } from '../../src/state/useUnreads';
-import apiClient from "../../src/api/client";
+import { UnreadContext } from '../../src/context/UnreadContext';
 
-const SOCKET_URL = apiClient.getUri().replace(/\/api$/, ''); // get rid of the '/api'
 
 function Badge({ count }: { count: number }) {
   // if (!count) return null;
-  // console.log(`_layout.tsx: Unread badge count: ${count}`);
+  console.log(`_layout.tsx: Update unread badge count: ${count}`);
   return (
     <View style={{ position: 'absolute', top: -4, right: -10, backgroundColor: 'red', borderRadius: 10, minWidth: 18, height: 18, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center'}}>
       <Text style={{ color: 'white', fontSize: 11, fontWeight: '700' }}>{count > 99 ? '99+' : count}</Text>
@@ -19,7 +18,9 @@ function Badge({ count }: { count: number }) {
 }
 
 export default function TabsLayout() {
-  const { total } = useUnreads(SOCKET_URL);
+  // const { total } = useUnreads(SOCKET_URL);
+  const { total } = useContext(UnreadContext);
+
   return (
     <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen name="home" options={{ 

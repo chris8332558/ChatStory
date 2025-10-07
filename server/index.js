@@ -68,7 +68,10 @@ io.on('connection', (socket) => {
             console.error('server/index: joinRoom error:', err);
         }
     })
+
     
+    // This means this socket joined the `room` with name `unreadBumpRoom`
+    socket.join('unreadBumpRoom');
 
     // When another client sends a message.
     // Listens for a custom event called 'sendMessage' from this user's client.
@@ -92,6 +95,7 @@ io.on('connection', (socket) => {
             const newSeq = seqRes.rows[0].msg_seq;
             console.log(`server/index: socket.on(sendMessage): New message saved with _id: ${saved._id} in room_id: ${room_id}, newSeq: ${newSeq}`);
 
+            // Update the sender's last_read_seq to the newSeq so they won't have unread for their own message
             await pgPool.query(`
                 INSERT INTO User_Room_State (user_id, room_id, last_read_seq)
                 VALUES ($1, $2, $3)
@@ -113,12 +117,13 @@ io.on('connection', (socket) => {
             // Broadcast the message to everyone in the room
             // This is the broadcasting logic. It sends the 'receiveMessage' event to all users in the specified room except the sender. This prevents the sender from receiving their own message twice
             io.to(room_id).emit('receiveMessage', { msg, newSeq }); // client will listen to 'receiveMessage' to get new message
+            console.log(`server/index: io.to(receiveMessage): Socket server emit(receiveMessage) to room:${room_id}, text: ${text}`);
 
             // Emitting a small “bump” event keeps socket traffic minimal and defers unread computation to a single GET /api/unreads call on the client, which simplifies server logic and remains responsive at scale.
             // notify other members in the room to refresh their unread counts (exclude sender)
-            socket.to(room_id).emit('roomUnreadBump', { room_id }); // client can fetch /api/unreads
+            socket.to('unreadBumpRoom').emit('roomUnreadBump', { room_id }); // client can fetch /api/unreads
+            console.log(`server/index: socket.to(roomUnreadBump): Socket server emit(roomUnreadBump) to room:${room_id}`);
 
-            console.log(`server/index: io.to(receiveMessage): Socker server emit(receiveMessage) to room:${room_id}, text: ${text}`);
         } catch (err) {
             console.error('sendMessage error:', err);
         }

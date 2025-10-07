@@ -15,9 +15,13 @@
 
 import React, { useContext, useEffect } from "react";
 import AuthContext, { AuthProvider } from '../src/context/AuthContext';
+import { UnreadProvider } from '../src/context/UnreadContext';
 import { router, Slot } from 'expo-router';
 import { View, ActivityIndicator } from "react-native";
 import * as Notifications from 'expo-notifications';
+import apiClient from "../src/api/client";
+
+const SOCKET_URL = apiClient.getUri().replace(/\/api$/, '');
 
 // The <Slot /> component renders the current child route. Expo Router will handle switching 
 // between the (auth) and (tabs) groups based on the logic in our index.js file.
@@ -54,7 +58,9 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <RootLayoutNav />
+      <UnreadProvider socketUrl={SOCKET_URL}>
+        <RootLayoutNav />
+      </UnreadProvider>
     </AuthProvider>
   );
 };
