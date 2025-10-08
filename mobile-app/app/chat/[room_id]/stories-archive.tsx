@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState, useCallback } from "react";
 import { View, Text, Button, Alert, Image, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { StoryType } from "../../../../shared/types";
 import ui from '../../../src/ui/shared';
 
 export default function StoriesArchive() {
@@ -44,6 +45,16 @@ export default function StoriesArchive() {
         load();
     }, [load]);
 
+    const renderArchiveThumb = ({ item } : { item: StoryType }) => {
+        const thumbSource = item.thumbnail_url ? { uri: item.thumbnail_url } : { uri: item.media_url}
+        return (
+            <View style={styles.cell}>
+                <TouchableOpacity onPress={() => router.push(`./story-archive/${item._id}`)} style={styles.thumb}>
+                    <Image source={thumbSource} style={styles.thumb} />
+                </TouchableOpacity>
+            </View>
+        );
+    };
 
     return (
         <SafeAreaProvider>
@@ -55,14 +66,7 @@ export default function StoriesArchive() {
                     data={archives}
                     numColumns={3}
                     keyExtractor={(item) => item._id?.toString() || `${item.created_at}-${item.user_id}`}
-                    renderItem={({item}) => (
-                        <TouchableOpacity 
-                            style={styles.cell} 
-                            onPress={() => router.push(`/chat/${room_id}/stories`)}
-                        >
-                            <Image source={{uri: item.media_url }} style={styles.thumb} />
-                        </TouchableOpacity>
-                    )}
+                    renderItem={renderArchiveThumb}
                     onEndReachedThreshold={0.6}
                     onEndReached={() => { if (!isLoading && !done) load(); }}
                     ListFooterComponent={isLoading ? <ActivityIndicator /> : null}

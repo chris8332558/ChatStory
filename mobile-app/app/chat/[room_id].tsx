@@ -40,7 +40,6 @@ export default function ChatScreen() {
     const fetchRoomName = useCallback(async () => {
         try{
             const room = await getRoomByRoomId(room_id);
-            console.log('room_name', room.name);
             setRoomName(room.name);
         } catch (err) {
             console.error('Failed to fetch room name', err);
