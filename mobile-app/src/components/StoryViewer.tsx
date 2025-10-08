@@ -17,14 +17,11 @@ type StoryViewerProps = {
 
 export default function StoryViewer({ story, onBack , onGoToRoom }: StoryViewerProps) {
     const [isLoading, setIsLoading] = useState(false);
+
     const isVideo = story.media_type.startsWith('video/');
     const player = useVideoPlayer(story?.media_url ?? null, (player) => {
         player.loop = false;
         player.play();
-    });
-
-    useEffect(() => {
-        console.log(`StoryViewer.tsx: story.room_id=${story._id}`);
     });
 
     const downloadStory = async () => {
@@ -38,10 +35,20 @@ export default function StoryViewer({ story, onBack , onGoToRoom }: StoryViewerP
                 return;
             }
             
-            destination.create();
-            const output = await File.downloadFileAsync(story.media_url, destination);
-            console.log(`StoryViewer: Is filed downloaded: ${output.exists}`);
-            console.log(`StoryViewer: file uri: ${output.uri}`);
+            if (!destination.exists) {
+                destination.create();
+            }
+            const downloadedFile = await File.downloadFileAsync(story.media_url, destination);
+            console.log(`StoryViewer: Is filed downloaded: ${downloadedFile.exists}`);
+            console.log(`StoryViewer: file uri: ${downloadedFile.uri}`);
+
+            try {
+                await MediaLibrary.saveToLibraryAsync(downloadedFile.uri);
+                Alert.alert('Image Saved to Photos');
+            } catch (err) {
+                console.error('StoryViewer.tsx: Error saving image to Photos:', err);
+                Alert.alert('Failed to save image to Photos.');
+            }
 
 
         } catch (err: any) {
