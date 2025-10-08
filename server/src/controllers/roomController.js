@@ -31,4 +31,15 @@ exports.getUserRooms = async (req, res) => {
     }
 };
 
+exports.getRoomByRoomId = async (req, res) => {
+    try {
+        const { room_id } = req.params;
+        const room_name = await Room.getRoomByRoomId({room_id});
+        return res.status(200).json(room_name)
+    } catch (err) {
+        console.error('roomController.js: getRoomByRoomId error: ', err);
+        res.status(500).json({ message: 'Server error'});
+    }
+}
+
 // exports.addUserToRoom = async (req, res)

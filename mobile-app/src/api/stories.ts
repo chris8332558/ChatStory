@@ -1,16 +1,5 @@
 import apiClient from "./client";
-
-export type StoryType = {
-    _id: string,
-    room_id: string,
-    user_id: string,
-    username: string,
-    media_url: string,
-    media_type: string, // e.g. image/jepg or video/mp4
-    duration_ms: number,
-    created_at: string,
-    expires_at: string,
-};
+import { StoryType } from "../../../shared/types";
 
 export async function getPresignedUrl(room_id: string, content_type: string) {
     const res = await apiClient.post('/stories/presigned-url', { room_id, content_type });
@@ -25,6 +14,7 @@ export async function createStory(payload: {
     media_url: string;
     media_type: string;
     duration_ms?: number;
+    thumbnail_url?: string;
 }) {
     const res = await apiClient.post('/stories', payload);
     return res.data;

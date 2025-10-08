@@ -1,10 +1,11 @@
 const { getDB } = require('../../config/index');
+// const { StoryType } = require("../../../../shared/types");
 
 const ACTIVE_COLLECTION = 'StoriesActive';
 const ARCHIVE_COLLECTION = 'StoriesArchive';
 
 const StoryModel = {
-    async create({room_id, user_id, username, media_url, media_type, duration_ms, created_at = new Date()}) {
+    async create({room_id, user_id, username, media_url, media_type, duration_ms, thumbnail_url = null, created_at = new Date()}) {
         // Create both active and archive story
         console.log('story.js::create')
         const db = getDB();
@@ -17,6 +18,7 @@ const StoryModel = {
             media_url,
             media_type, // e.g. image/jepg or video/mp4
             duration_ms,
+            thumbnail_url, // for video, can be null for image
             created_at,
             expires_at,
         }

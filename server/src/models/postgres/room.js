@@ -61,14 +61,6 @@ const Room = {
         return res.rowCount > 0;
     },
 
-    async findUserByEmail({ email }) {
-        const res = await pgPool.query(
-            'SELECT user_id, username, email FROM Users WHERE email = $1',
-            [ email ]
-        );
-        return res.rows[0] || null;
-    },
-
     // This method safely adds a user to a room without causing errors if they're already a member.
     // The `ON CONFLICT DO NOTHING` Clause: Remember that your room_members table has a UNIQUE (user_id, room_id) constraint.
     // Without ON CONFLICT DO NOTHING, trying to add the same user to the same room twice would cause a database error.
@@ -78,7 +70,14 @@ const Room = {
             'INSERT INTO Room_Members (user_id, room_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
             [user_id, room_id]
         );
-    }
+    },
+    
+    async getRoomByRoomId({ room_id }) {
+        const res = await pgPool.query(
+            'SELECT * FROM Rooms WHERE room_id=$1', [room_id]
+        );
+        return res.rows[0];
+    },
 };
 
 module.exports = Room;

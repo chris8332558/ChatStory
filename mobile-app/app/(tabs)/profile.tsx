@@ -5,7 +5,8 @@ import { View, Button, Text, TextInput, StyleSheet, Alert, FlatList, TouchableOp
 import AuthContext from '../../src/context/AuthContext';
 import { getMe, Me, updateMe, getAvatarPresignedUrl } from "../../src/api/users";
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { listMyActiveStories, listMyArchiveStories, StoryType } from "../../src/api/stories";
+import { listMyActiveStories, listMyArchiveStories } from "../../src/api/stories";
+import { StoryType } from "../../../shared/types";
 import ui from '../../src/ui/shared';
 
 export default function ProfileScreen() {
@@ -59,7 +60,7 @@ export default function ProfileScreen() {
             const page = await listMyArchiveStories(archiveCursor, 30);
             setArchive(prev =>[...prev, ...page]);
             if (page.length > 0) {
-                setArchiveCursor(page[page.length-1].created_at);       
+                setArchiveCursor(new Date(page[page.length-1].created_at).toISOString());       
             } else {
                 setArchiveDone(true);
             }
@@ -151,18 +152,24 @@ export default function ProfileScreen() {
     };
 
     const renderActiveThumb = ({ item } : { item: StoryType }) => {
+        const thumbSource = item.thumbnail_url ? { uri: item.thumbnail_url } : { uri: item.media_url}
         return (
-        <View style={styles.activeCell}>
-            <Image source={{ uri: item.media_url }} style={styles.storyThumb} />
-        </View>
+            <View style={styles.activeCell}>
+                <TouchableOpacity onPress={() => router.push(`../profile/story/${item._id}`)} style={styles.storyThumb}>
+                    <Image source={thumbSource} style={styles.storyThumb} />
+                </TouchableOpacity>
+            </View>
         );
     };
 
     const renderArchiveThumb = ({ item } : { item: StoryType }) => {
+        const thumbSource = item.thumbnail_url ? { uri: item.thumbnail_url } : { uri: item.media_url}
         return (
-        <View style={styles.archiveCell}>
-            <Image source={{ uri: item.media_url }} style={styles.storyThumb} />
-        </View>
+            <View style={styles.archiveCell}>
+                <TouchableOpacity onPress={() => router.push(`../profile/story/${item._id}`)} style={styles.storyThumb}>
+                    <Image source={thumbSource} style={styles.storyThumb} />
+                </TouchableOpacity>
+            </View>
         );
     };
 
@@ -179,10 +186,15 @@ export default function ProfileScreen() {
                     ListHeaderComponent={
                         <View style={styles.header}>
                             <TouchableOpacity onPress={onChangeAvatar} style={{ alignSelf: 'center', marginBottom: 12 }}>
-                                <Image 
-                                    source={form?.avatar_url ? { uri: form.avatar_url} : require('../../assets/images/Avatar_Placeholder.png') }
-                                    style={{ width: 96, height: 96, borderRadius: 48 }}
-                                />
+                                {updatingAvatar ? (
+                                        <ActivityIndicator size='large' style={{ flex: 1 }} />
+                                    ): (
+                                        <Image 
+                                            source={form?.avatar_url ? { uri: form.avatar_url} : require('../../assets/images/Avatar_Placeholder.png') }
+                                            style={{ width: 96, height: 96, borderRadius: 48 }}
+                                        />
+                                    )
+                                }
                             </TouchableOpacity>
 
                             <View style={styles.formRow}>
@@ -218,6 +230,7 @@ export default function ProfileScreen() {
                                     horizontal={true}
                                     keyExtractor={(item) => item._id?.toString() || `${item.created_at}-${item.user_id}`}
                                     renderItem={renderActiveThumb}
+
                                 />
                             )}
 

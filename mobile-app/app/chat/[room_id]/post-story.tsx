@@ -1,10 +1,11 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { View, Text, Button, Alert, StyleSheet, ActivityIndicator, Dimensions } from "react-native"
 import * as ImagePicker from 'expo-image-picker';
+import * as VideoThumbnails from 'expo-video-thumbnails';
 import { useState } from "react";
 import { createStory, getPresignedUrl } from "../../../src/api/stories";
-
 const { height, width } = Dimensions.get('screen');
+
 
 export default function PostStory() {
     const { room_id } = useLocalSearchParams<{ room_id: string }>();
@@ -111,6 +112,19 @@ export default function PostStory() {
         const content_type = asset.mimeType || (isVideo ? 'video/mp4' : 'image/jpeg');
         console.log('post-story.tsx: content_type: ', content_type);
 
+        // Set video thumbnail
+        let thumbnail_uri = null;
+        if (isVideo) {
+            try {
+                const { uri } = await VideoThumbnails.getThumbnailAsync(asset.uri, { time: 1000 });
+                thumbnail_uri = uri;
+                console.log('post-story.tsx: thumbnail_uri: ', thumbnail_uri);
+            } catch (err) {
+                console.error('post-story.tsx: getThumbnailAsync error: ', err);
+                Alert.alert('Error', 'Failed to get video thumbnail');
+                return;
+            }
+        }
 
         setIsLoading(true);
         try {
@@ -135,13 +149,33 @@ export default function PostStory() {
             }
             console.log('post-story.tsx: Successfully upload file to s3');
 
-            // 3. Create story
+            // 3. Upload video thumbnail if video
+            let thumbnail_url = null;
+            if (isVideo && thumbnail_uri) {
+                const thumbUpload = await getPresignedUrl(room_id as string, 'image/jpeg');
+                const thumbResp = await fetch(thumbnail_uri);
+                const thumbBlob = await thumbResp.blob();
+                const thumbPut = await fetch(thumbUpload.upload_url, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'image/jpeg' },
+                    body: thumbBlob,
+                });
+                thumbnail_url = thumbUpload.media_url;
+                console.log(`post-story.tsx: thumbnail_url=${thumbnail_url}`);
+                if (!thumbPut.ok) {
+                    throw new Error("Upload thumbnail to s3 failed");
+                }
+                console.log('post-story.tsx: Successfully upload thumbnail to s3');
+            }
+
+            // 4. Create story
             console.log('post-story.tsx: Start createStory()');
             await createStory({
                 room_id: room_id as string,
                 media_url: media_url,
                 media_type: content_type,
                 duration_ms: !isVideo ? 5000 : 0,
+                thumbnail_url: thumbnail_url,
             });
 
             Alert.alert('Success', 'Story posted');

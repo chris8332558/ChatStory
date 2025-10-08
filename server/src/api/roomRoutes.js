@@ -15,4 +15,10 @@ router.post('/', roomController.createRoom);
 // @access Private
 router.get('/', roomController.getUserRooms);
 
+
+// @route GET /api/rooms/:room_id
+// @desc get the room with its room_id
+// @access Private
+router.get('/:room_id', roomController.getRoomByRoomId)
+
 module.exports = router;

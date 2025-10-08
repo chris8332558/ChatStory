@@ -1,9 +1,11 @@
 import { useEvent } from "expo";
-import { listActiveStories, StoryType } from "../../../src/api/stories";
+import { listActiveStories } from "../../../src/api/stories";
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useState, useEffect, useCallback } from "react";
+import { StoryType } from "../../../../shared/types";
 import ui from "../../../src/ui/shared";
+
 
 import { Text, View, Button, Image, StyleSheet, ActivityIndicator, TouchableWithoutFeedback, Dimensions, Alert } from "react-native";
 

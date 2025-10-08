@@ -14,8 +14,8 @@ import ui from '../../src/ui/shared';
 import { fetchRoomMessages, MessageType } from "../../src/api/messages";
 import { addUserToRoom } from "../../src/api/members";
 import { markRoomRead } from "../../src/api/unreads";
-import { useUnreads } from "@/src/state/useUnreads";
 import { UnreadContext } from '../../src/context/UnreadContext';
+import { getRoomByRoomId } from '../../src/api/room';
 
 
 // apiClient.getUri() returns 'http://10.1.16.172:3000/api'
@@ -24,10 +24,11 @@ const SOCKET_URL = apiClient.getUri().replace(/\/api$/, ''); // get rid of the '
 
 export default function ChatScreen() {
     // Get room id and room name from the file path (e.g. /chat/123?room_name=General)
-    const { room_id, room_name } = useLocalSearchParams<{ room_id: string; room_name: string }>();
+    const { room_id } = useLocalSearchParams<{ room_id: string }>();
     const [ messages, setMessages ] = useState<MessageType[]>([]);
     const [ currentMessage, setCurrentMessage ] = useState('');
     const [ loadingHistory, setLoadingHistory ] = useState(false);
+    const [ roomName, setRoomName ] = useState('')
 
     const [ emailToAdd, setEmailToAdd ] = useState('');
     const [ addMemberModalVisible, setAddMemberModalVisible] = useState(false);
@@ -35,6 +36,21 @@ export default function ChatScreen() {
     const socketRef = useRef<Socket | null>(null); // Holds the live Socker.IO client instance across renders (useRef avoids reconnecting on every render)
     const { markRead, setRoomZero, refresh } = useContext(UnreadContext);
 
+
+    const fetchRoomName = useCallback(async () => {
+        try{
+            const room = await getRoomByRoomId(room_id);
+            console.log('room_name', room.name);
+            setRoomName(room.name);
+        } catch (err) {
+            console.error('Failed to fetch room name', err);
+            Alert.alert('Error', 'Could not fetch your room name.');
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchRoomName();
+    }, [fetchRoomName]);
 
     // Focus → mark read immediately when in the room (idempotent, optimistic zero)
     useFocusEffect(
@@ -174,7 +190,7 @@ export default function ChatScreen() {
                 <View style={{backgroundColor: 'lightgrey', justifyContent: 'space-between', flexDirection: 'row', alignItems: 'flex-start', padding: 10, borderBottomWidth: 3, borderBottomColor: 'black'}}>
                     <View style={{flexDirection: 'row', flex: 1 }}>
                         <Button title="<" onPress={() => router.back()} />
-                        <Text style={styles.roomName}>{room_name}</Text>
+                        <Text style={styles.roomName}>{roomName}</Text>
                     </View>
                     <Button title="Add" onPress={() => setAddMemberModalVisible(true)} />
                     <Button title="Archive" onPress={() => router.push(`/chat/${room_id}/stories-archive`)} />

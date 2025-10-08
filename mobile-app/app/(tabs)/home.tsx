@@ -4,19 +4,20 @@ import { View, Button, Text, TextInput, StyleSheet, Alert, TouchableOpacity, Fla
 import apiClient from "../../src/api/client";
 import { useUnreads } from '../../src/state/useUnreads';
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { RoomType, getUserRooms } from '../../src/api/room';
 import ui from '../../src/ui/shared';
 
 
-// Define the type for a room obejct
-interface Room {
-    room_id: string;
-    name: string;
-}
+// // Define the type for a room obejct
+// interface Room {
+//     room_id: string;
+//     room_name: string;
+// }
 
 const SOCKET_URL = apiClient.getUri().replace(/\/api$/, ''); // get rid of the '/api'
 
 export default function HomeScreen() {
-    const [rooms, setRooms] = useState<Room[]>([]);
+    const [rooms, setRooms] = useState<RoomType[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [newRoomName, setNewRoomName] = useState('');
 
@@ -25,9 +26,9 @@ export default function HomeScreen() {
     // Fetch rooms from the server
     const fetchRooms = useCallback(async () => {
         try {
-            const response = await apiClient.get('/rooms');
-            console.log('home.tsx: fetchrooms');
-            setRooms(response.data);
+            const rooms = await getUserRooms();
+            // console.log(`home.tsx: fetchrooms: ${rooms[0].name}`);
+            setRooms(rooms);
         } catch (err) {
             console.error('Failed to fetch rooms', err);
             Alert.alert('Error', 'Could not fetch your rooms.');
@@ -53,10 +54,10 @@ export default function HomeScreen() {
         }
     };
 
-    const renderItem = ({ item }: { item: Room }) => {
+    const renderItem = ({ item }: { item: RoomType }) => {
         const unread = counts[item.room_id] || 0;
         return (
-            <TouchableOpacity onPress={() => router.push(`/chat/${item.room_id}?room_name=${item.name}`)}>
+            <TouchableOpacity onPress={() => router.push(`/chat/${item.room_id}`)}>
                 <View style={styles.roomItem}>
                     <Text style={styles.roomName}>{item.name}</Text>
                     {unread > 0 && (

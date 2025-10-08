@@ -1,7 +1,7 @@
 const StoryModel = require('../models/mongo/story');
 const Room = require('../models/postgres/room');
 const { getPresignedUploadUrl } = require('../services/s3Service');
-const crypto = require('crypto');
+const nodeCrypto = require('crypto');
 
 exports.getPresigned = async (req, res) => {
     try {
@@ -23,7 +23,7 @@ exports.getPresigned = async (req, res) => {
         // extract the file extension from content_type (e.g. 'jpeg' from 'image/jpeg')
         // key: A unique s3 key to be used as the object path
         const ext = content_type.includes('/') ? content_type.split('/')[1] : 'bin';
-        const key = `rooms/${room_id}/stories/${user_id}/${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${ext}`;
+        const key = `rooms/${room_id}/stories/${user_id}/${Date.now()}-${nodeCrypto.randomBytes(6).toString('hex')}.${ext}`;
 
         const { upload_url, media_url } = await getPresignedUploadUrl({ key, content_type });
         console.log('storyController.js: Received uplaod_url and media_url from s3Service.js');
@@ -39,7 +39,7 @@ exports.getPresigned = async (req, res) => {
 exports.createStory = async (req, res) => {
     try {
         console.log('storyController.js: Start createStory()');
-        const { room_id, media_url, media_type, duration_ms } = req.body;
+        const { room_id, media_url, media_type,  duration_ms, thumbnail_url } = req.body;
         const user_id = req.user.id;
         const username = req.user.username;
         console.error(`storyController.js: room_id: ${room_id}, media_url: ${media_url}, media_type: ${media_type}`);
@@ -56,17 +56,20 @@ exports.createStory = async (req, res) => {
 
         const created = await StoryModel.create({
             // default 5s for image
-            room_id, user_id, username, media_url, media_type, duration_ms: duration_ms || (media_type.startsWith('image/') ? 5000 : 0)
+            room_id, user_id, username, media_url, media_type, 
+            duration_ms: duration_ms || (media_type.startsWith('image/') ? 5000 : 0),
+            thumbnail_url
         });
 
         return res.status(201).json({
-            id: created._id,
+            _id: created._id,
             room_id: created.room_id,
             user_id: created.user_id,
             username: created.username,
             media_url: created.media_url,
             media_type: created.media_type, // e.g. image/jepg or video/mp4
             duration_ms: created.duration_ms,
+            thumbnail_url: created.thumbnail_url,
             created_at: created.created_at,
             expires_at: created.expires_at,
         });
@@ -89,13 +92,14 @@ exports.listActive = async (req, res) => {
 
         const stories = await StoryModel.listActiveByRoom({ room_id });
         return res.json(stories.map(s => ({
-            id: s._id,
+            _id: s._id,
             room_id: s.room_id,
             user_id: s.user_id,
             username: s.username,
             media_url: s.media_url,
             media_type: s.media_type, // e.g. image/jepg or video/mp4
             duration_ms: s.duration_ms,
+            thumbnail_url: s.thumbnail_url,
             created_at: s.created_at,
             expires_at: s.expires_at,
         })));
@@ -122,12 +126,14 @@ exports.listArchive = async (req, res) => {
         );
 
         return res.json(stories.map(s => ({
-            id: s._id,
+            _id: s._id,
+            room_id: s.room_id,
             user_id: s.user_id,
             username: s.username,
             media_url: s.media_url,
             media_type: s.media_type, // e.g. image/jepg or video/mp4
             duration_ms: s.duration_ms,
+            thumbnail_url: s.thumbnail_url,
             created_at: s.created_at,
             expires_at: s.expires_at,
         })));
@@ -141,22 +147,18 @@ exports.listArchive = async (req, res) => {
 
 exports.listMineActive = async (req, res) => {
     try {
-        // const { room_id } = req.params;
         const user_id = req.user.id;
-
-        // const isMember = await Room.isMember({ user_id, room_id });
-        // if (!isMember) {
-        //     return res.status(403).json({ message: "stroyController.js: Not a room member "});
-        // }
-
         const stories = await StoryModel.listActiveByUser({ user_id });
+
         return res.json(stories.map(s => ({
-            id: s._id,
+            _id: s._id,
+            room_id: s.room_id,
             user_id: s.user_id,
             username: s.username,
             media_url: s.media_url,
             media_type: s.media_type, // e.g. image/jepg or video/mp4
             duration_ms: s.duration_ms,
+            thumbnail_url: s.thumbnail_url,
             created_at: s.created_at,
             expires_at: s.expires_at,
         })));
@@ -169,26 +171,21 @@ exports.listMineActive = async (req, res) => {
 
 exports.listMineArchive = async (req, res) => {
     try {
-        // const { room_id } = req.params;
         const { before, limit } = req.query;
         const user_id = req.user.id;
-
-        // const isMember = await Room.isMember({ user_id, room_id });
-        // if (!isMember) {
-        //     return res.status(403).json({ message: "stroyController.js: Not a room member "});
-        // }
-
         const stories = await StoryModel.listArchiveByUser(
             { user_id, before, limit: Math.min(parseInt(limit || '50', 10), 50) }
         )
 
         return res.json(stories.map(s => ({
-            id: s._id,
+            _id: s._id,
+            room_id: s.room_id,
             user_id: s.user_id,
             username: s.username,
             media_url: s.media_url,
             media_type: s.media_type, // e.g. image/jepg or video/mp4
             duration_ms: s.duration_ms,
+            thumbnail_url: s.thumbnail_url,
             created_at: s.created_at,
             expires_at: s.expires_at,
         })));
