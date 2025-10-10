@@ -1,4 +1,3 @@
-const { get } = require('../app');
 const { pgPool } = require('../config');
 const User = require('../models/postgres/user');
 

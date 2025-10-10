@@ -78,6 +78,18 @@ const Room = {
         );
         return res.rows[0];
     },
+
+    // The INTERSECT query finds all the rooms that are present in both List A and List B.
+    async findCommonRooms({user_a_id, user_b_id}) {
+        const res = await pgPool.query(
+            'SELECT room_id FROM Room_Members WHERE user_id = $1 INTERSECT SELECT room_id FROM Room_Members WHERE user_id = $2',
+            [user_a_id, user_b_id]
+        )
+        // res.rows contains an array of object, e.g. [{room_id: 1}, {room_id: 2}], and map(r => r.room_id) transforms this array into a simple array, e.g. [1, 2]
+        return res.rows.map(r => r.room_id);
+    },
+
+
 };
 
 module.exports = Room;

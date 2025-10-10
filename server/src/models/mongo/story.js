@@ -93,6 +93,37 @@ const StoryModel = {
 
         return item;
     },
+
+    async listActiveByRoomsAndUser({ room_ids, user_id, limit = 100 }) {
+        const db = getDB()
+        const now = new Date();
+        const filter = { user_id: user_id, room_id: { $in: room_ids }, expires_at: { $gt: now }}
+        const item = await db
+            .collection(ACTIVE_COLLECTION)
+            .find(filter)
+            .sort({ created_at: -1 })
+            .limit(limit)
+            .toArray();
+
+        return item;
+    },
+
+    async listArchiveByRoomsAndUser({ room_ids, user_id, before, limit = 100 }) {
+        const db = getDB()
+        const now = new Date();
+        const filter = { user_id: user_id, room_id: { $in: room_ids } }
+        if (before) {
+            filter.created_at = { $lt: new Date(before) };
+        }
+        const item = await db
+            .collection(ARCHIVE_COLLECTION)
+            .find(filter)
+            .sort({ created_at: -1 })
+            .limit(limit)
+            .toArray();
+
+        return item;
+    },
 }
 
 module.exports = StoryModel;

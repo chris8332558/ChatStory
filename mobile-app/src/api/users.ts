@@ -1,3 +1,4 @@
+import { StoryType } from "../../../shared/types";
 import apiClient from "./client";
 
 export type Me = {
@@ -26,3 +27,18 @@ export async function updateMe(patch: Partial<Pick<Me, 'username' | 'email' | 'd
     const res = await apiClient.patch('users/me', patch);
     return res.data as Me;
 };
+
+export async function getUserProfile(user_id: string) {
+  const response = await apiClient.get(`/users/${user_id}`);
+  return response.data;
+}
+
+export async function getMutualActiveStories(user_id: string): Promise<StoryType[]> {
+  const response = await apiClient.get(`/users/${user_id}/stories/active`);
+  return response.data;
+}
+
+export async function getMutualArchiveStories(user_id: string, before?: string): Promise<StoryType[]> {
+  const response = await apiClient.get(`/users/${user_id}/stories/archive`, { params: { before } });
+  return response.data;
+}

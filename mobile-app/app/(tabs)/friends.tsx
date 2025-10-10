@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Button, Text, FlatList, StyleSheet, Alert, ActivityIndicator, TextInput, Image } from 'react-native';
+import { View, Button, Text, FlatList, StyleSheet, Alert, ActivityIndicator, TextInput, Image, TouchableOpacity } from 'react-native';
 import { acceptRequest, listFriends, deleteFriend, listRequests, rejectRequest, sendRequest } from "../../src/api/friends";
 import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
+import { Link, useRouter } from "expo-router";
+import { FriendProfileType } from "../../../shared/types";
 
 export default function FriendsScreen() {
-    const [friends, setFriends] = useState<any[]>([]);
+    const router = useRouter();
+    const [friends, setFriends] = useState<FriendProfileType[]>([]);
     const [requests, setRequests] = useState<{ incoming: any[], outgoing: any[] }>({ incoming: [], outgoing: [] });
     const [isLoading, setIsLoading] = useState(false);
     const [requestIdentifirer, setRequestIdentifier] = useState<string>(''); // Can be user_id, email, or useranme
@@ -141,14 +144,18 @@ export default function FriendsScreen() {
                     data={friends}
                     keyExtractor={(item) => item.user_id.toString()}
                     renderItem={({ item }) => (
-                        <View style={styles.friendRow}>
-                            <Image source={{ uri: item.avatar_url || 'https://www.gravatar.com/avatar?d=mp' }} style={styles.avatar} />
-                            <View style={{ flex: 1, flexDirection: 'column' }}>
-                                <Text style={styles.name}>{item.display_name}</Text>
-                                <Text style={styles.subtle}>{item.username}</Text>
-                                <Button title="Delete" color="#ef4444" onPress={() => onDeleteFriend(item.user_id)} />
-                            </View>
-                        </View>
+                        // <Link href={`../user/${item.user_id}`} asChild>
+                            <TouchableOpacity onPress={() => router.push(`../user/${item.user_id}`)}>
+                                <View style={styles.friendRow}>
+                                    <Image source={{ uri: item.avatar_url || 'https://www.gravatar.com/avatar?d=mp' }} style={styles.avatar} />
+                                    <View style={{ flex: 1, flexDirection: 'column' }}>
+                                        <Text style={styles.name}>{item.display_name}</Text>
+                                        <Text style={styles.subtle}>{item.username}</Text>
+                                        <Button title="Delete" color="#ef4444" onPress={() => onDeleteFriend(item.user_id)} />
+                                    </View>
+                                </View>
+                             </TouchableOpacity>
+                        //  </Link>
                     )}
                 />
             </SafeAreaView>

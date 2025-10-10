@@ -10,3 +10,12 @@ export type StoryType = {
     created_at: string,
     expires_at: string,
 };
+
+export type FriendProfileType = {
+    user_id: string,
+    username: string,
+    // email: string,
+    // created_at: string, // ISO string
+    display_name: string,
+    avatar_url: string,
+};
