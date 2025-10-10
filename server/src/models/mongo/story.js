@@ -1,4 +1,6 @@
 const { getDB } = require('../../config/index');
+const { ObjectId } = require('mongodb'); // Make sure to import ObjectId
+
 // const { StoryType } = require("../../../../shared/types");
 
 const ACTIVE_COLLECTION = 'StoriesActive';
@@ -31,6 +33,19 @@ const StoryModel = {
         
         return { _id: res.insertedId, ...activeDoc };
 
+    },
+
+    async getStoryById({ story_id }) {
+        // console.log(`story_id=${story_id}, typeof=${typeof story_id}`);
+        if (!ObjectId.isValid(story_id)) {
+            console.error('Invalid story_id format');
+            return null;
+        }
+        const db = getDB();
+        const item = await db
+            .collection(ARCHIVE_COLLECTION)
+            .findOne({ _id: new ObjectId(story_id) });
+        return item;
     },
 
     async listActiveByRoom({ room_id, limit = 100 }) {

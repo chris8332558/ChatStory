@@ -7,6 +7,7 @@ import { getUserProfile, getMutualActiveStories, getMutualArchiveStories } from 
 import { deleteFriend } from "@/src/api/friends";
 import StoryViewer from "@/src/components/StoryViewer";
 
+// Friend's profile screen
 export default function UserProfileScreen() {
     const { user_id } = useLocalSearchParams<{ user_id: string }>();
     const router = useRouter();

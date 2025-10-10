@@ -79,6 +79,17 @@ exports.createStory = async (req, res) => {
     }
 };
 
+exports.getStoryById = async (req, res) => {
+    try {
+        const { story_id } = req.params;
+        const story = await StoryModel.getStoryById({ story_id });
+        return res.status(200).json(story);
+    } catch (err) {
+        console.error('stroyController.js: getStoryById error: ', err)
+        return res.status(500).json({ message: 'stroyController.js: Server error' });
+    }
+};
+
 
 exports.listActive = async (req, res) => {
     try {

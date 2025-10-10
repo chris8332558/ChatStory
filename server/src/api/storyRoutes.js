@@ -17,6 +17,7 @@ router.post('/presigned-url', storyController.getPresigned);
 // @access Private
 router.post('/', storyController.createStory);
 
+router.get('/:story_id', storyController.getStoryById)
 
 // Reads
 router.get('/rooms/:room_id/active', storyController.listActive);

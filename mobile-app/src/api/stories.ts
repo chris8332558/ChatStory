@@ -20,6 +20,11 @@ export async function createStory(payload: {
     return res.data;
 };
 
+export async function getStoryById(story_id: string) {
+    const res = await apiClient.get(`/stories/${story_id}`);
+    return res.data as StoryType;
+};
+
 export async function listActiveStories(room_id: string) {
     const res = await apiClient.get(`/stories/rooms/${room_id}/active`);
     return res.data as StoryType[];
