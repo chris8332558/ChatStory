@@ -7,16 +7,20 @@ import * as MediaLibrary from 'expo-media-library';
 // import * as FileSystem from 'expo-file-system';
 import { File, Directory, Paths } from 'expo-file-system';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import { deleteStory } from "../api/stories";
 
 type StoryViewerProps = {
     story: StoryType;
+    current_user_id: number;
     onBack : () => void;
     onGoToRoom: (room_id: string) => void;
 };
 
 
-export default function StoryViewer({ story, onBack , onGoToRoom }: StoryViewerProps) {
+// View of the tapped story
+export default function StoryViewer({ story, current_user_id, onBack , onGoToRoom }: StoryViewerProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const isVideo = story.media_type.startsWith('video/');
     const player = useVideoPlayer(story?.media_url ?? null, (player) => {
@@ -56,8 +60,29 @@ export default function StoryViewer({ story, onBack , onGoToRoom }: StoryViewerP
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const onDeleteStory = async () => {
+        Alert.alert('Delete Story', 'Are you sure you want to permanently delete this story?',
+            [
+                { text: 'Cancel', style: 'cancel'},
+                { text: 'Delete', style: 'destructive', onPress: async () => {
+                    setIsDeleting(true);
+                    try {
+                        await deleteStory(story._id);
+                        Alert.alert('Success', 'Your story has been deleted.');
+                        onBack(); // Close the viewer after successful deletion
+                    } catch (error) {
+                        Alert.alert('Error', 'Failed to delete the story. Please try again.');
+                    } finally {
+                        setIsDeleting(false);
+                    }
+                }},
+            ]
+        )
     }
 
+    const isOwner = story.user_id === current_user_id;
 
     return (
         <SafeAreaProvider>
@@ -94,6 +119,12 @@ export default function StoryViewer({ story, onBack , onGoToRoom }: StoryViewerP
                 <TouchableOpacity onPress={onBack} style={styles.button}>
                     <Text style={styles.buttonText}>Back</Text>
                 </TouchableOpacity>
+
+                {isOwner && (
+                    <TouchableOpacity onPress={onDeleteStory} style={[styles.button, styles.deleteButton]} disabled={isDeleting}>
+                        <Text style={styles.buttonText}>{isDeleting ? 'Deleting...' : 'Delete'}</Text>
+                    </TouchableOpacity>
+                )}
             </View>
         </SafeAreaProvider>
     )
@@ -114,4 +145,6 @@ const styles = StyleSheet.create({
     button: { backgroundColor: '#1e40af', borderRadius: 6, paddingVertical: 10, paddingHorizontal: 16, marginHorizontal: 6 },
     buttonText: { color: 'white', fontWeight: '600' },
     buttonDisabled: { opacity: 0.5 },
+    deleteButton: { backgroundColor: '#FF3B30' }, // A destructive action color
+
 });

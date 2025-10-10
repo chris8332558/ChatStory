@@ -42,11 +42,20 @@ export default function UserProfileScreen() {
         );
     };
 
-    const renderStoryThumb = ({ item } : { item: StoryType }) => {
+    const renderActiveThumb = ({ item } : { item: StoryType }) => {
         const thumbSource = item.thumbnail_url ? { uri: item.thumbnail_url } : { uri: item.media_url}
         return (
-            <TouchableOpacity onPress={() => router.push(`../profile/story/${item._id}`)} style={styles.thumbContainer}>
-                <Image source={thumbSource} style={styles.thumbnail} />
+            <TouchableOpacity onPress={() => router.push(`../profile/story/${item._id}`)} style={styles.activeCell}>
+                <Image source={thumbSource} style={styles.storyThumb} />
+            </TouchableOpacity>
+        );
+    };
+
+    const renderArchiveThumb = ({ item } : { item: StoryType }) => {
+        const thumbSource = item.thumbnail_url ? { uri: item.thumbnail_url } : { uri: item.media_url}
+        return (
+            <TouchableOpacity onPress={() => router.push(`../profile/story/${item._id}`)} style={styles.archiveCell}>
+                <Image source={thumbSource} style={styles.storyThumb} />
             </TouchableOpacity>
         );
     };
@@ -69,7 +78,7 @@ export default function UserProfileScreen() {
                 <Text style={styles.sectionHeader}>Active Stories (in mutual rooms)</Text>
                 <FlatList 
                     data={activeStories}
-                    renderItem={renderStoryThumb}
+                    renderItem={renderActiveThumb}
                     keyExtractor={(item) => item._id}
                     horizontal
                 />
@@ -77,7 +86,7 @@ export default function UserProfileScreen() {
                 <Text style={styles.sectionHeader}>Archive Stories (in mutual rooms)</Text>
                 <FlatList 
                     data={archiveStories}
-                    renderItem={renderStoryThumb}
+                    renderItem={renderArchiveThumb}
                     keyExtractor={(item) => item._id}
                     numColumns={3}
                 />
@@ -85,6 +94,7 @@ export default function UserProfileScreen() {
                 {selectedStory && (
                     <StoryViewer
                         story={selectedStory}
+                        current_user_id={user_id}
                         onBack={() => setSelectedStory(null)}
                         onGoToRoom={(room_id) => {
                             setSelectedStory(null); // Close the viewer
@@ -105,7 +115,9 @@ const styles = StyleSheet.create({
     email: { fontSize: 16, color: 'gray', textAlign: 'center', marginBottom: 20 },
     deleteButton: { backgroundColor: '#FF3B30', padding: 10, borderRadius: 8, alignSelf: 'center', marginBottom: 20 },
     buttonText: { color: 'white', fontWeight: 'bold' },
-    sectionHeader: { fontSize: 18, fontWeight: 'bold', marginTop: 20, marginBottom: 10 },
-    thumbContainer: { marginRight: 10 },
-    thumbnail: { width: 80, height: 120, borderRadius: 8, backgroundColor: '#eee' },
+    sectionHeader: { fontSize: 18, fontWeight: 'bold', marginTop: 50, marginBottom: 10 },
+    thumbContainer: { width: '33.33%', aspectRatio: 1, padding: 1 },
+    activeCell: { height: 100, aspectRatio: 1, padding: 1, },
+    archiveCell: { width: '33.33%', aspectRatio: 1, padding: 1 },
+    storyThumb: { flex: 1, borderRadius: 8, backgroundColor: '#e5e7eb'},
 });

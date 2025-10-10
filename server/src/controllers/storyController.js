@@ -206,3 +206,23 @@ exports.listMineArchive = async (req, res) => {
         return res.status(500).json({ message: "storyController.js: Server error" });
     }
 };
+
+exports.deleteStory = async (req, res) => {
+    try {
+        const user_id = req.user.id;
+        const { story_id } = req.params;
+
+        const deleteActiveResult = await StoryModel.deleteActiveStory({ user_id, story_id });
+        const deleteArchiveResult = await StoryModel.deleteArchiveStory({ user_id, story_id });
+
+        // If no story was deleted from either collection, it means the user didn't own it or it didn't exist
+        if (deleteActiveResult.deleteCount === 0 && deleteArchiveResult.deleteCount === 0) {
+            return res.status(404).json({ message: 'Story not found or you do not have permission to delete it.' });
+        }
+
+        return res.status(204).send();
+    } catch (err) {
+        console.error('Error deleting story:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

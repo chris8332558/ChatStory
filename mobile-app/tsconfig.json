@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "src/ui/styles.js"  ]
+, "src/ui/styles.js", "src/context/AuthContext.js"  ]
 }

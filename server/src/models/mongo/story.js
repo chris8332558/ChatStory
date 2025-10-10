@@ -28,7 +28,8 @@ const StoryModel = {
         const res = await db.collection(ACTIVE_COLLECTION).insertOne(activeDoc);
 
         // Archive now (copy) for durability and fast post-expiry queries
-        const archiveDoc = { ...activeDoc, active_id: res.insertedId };
+        // const archiveDoc = { ...activeDoc, active_id: res.insertedId };
+        const archiveDoc = { ...activeDoc };
         await db.collection(ARCHIVE_COLLECTION).insertOne(archiveDoc);
         
         return { _id: res.insertedId, ...activeDoc };
@@ -139,6 +140,32 @@ const StoryModel = {
 
         return item;
     },
+
+    async deleteActiveStory({ user_id, story_id }) {
+        if (!ObjectId.isValid(story_id)) {
+            return res.status(400).json({ message: 'Invalid story object id'});
+        }
+        
+        const db = getDB();
+        const res = await db.collection(ACTIVE_COLLECTION).deleteOne({
+            _id: new ObjectId(story_id),
+            user_id: user_id, // Enforce ownership
+        })
+        return res;
+    },
+
+    async deleteArchiveStory({ user_id, story_id }) {
+        if (!ObjectId.isValid(story_id)) {
+            return res.status(400).json({ message: 'Invalid story object id'});
+        }
+        
+        const db = getDB();
+        const res = await db.collection(ARCHIVE_COLLECTION).deleteOne({
+            _id: new ObjectId(story_id),
+            user_id: user_id, // Enforce ownership
+        });
+        return res;
+    }
 }
 
 module.exports = StoryModel;

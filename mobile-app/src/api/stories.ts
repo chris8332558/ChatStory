@@ -44,3 +44,7 @@ export async function listMyArchiveStories(before: string, limit = 50) {
     const res = await apiClient.get(`/stories/me/archive`, { params: { before, limit }});
     return res.data as StoryType[];
 };
+
+export async function deleteStory(story_id: string): Promise<void> {
+    await apiClient.delete(`/stories/${story_id}`);
+};

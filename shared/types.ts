@@ -1,7 +1,7 @@
 export type StoryType = {
     _id: string,
     room_id: string,
-    user_id: string,
+    user_id: number,
     username: string,
     media_url: string,
     media_type: string, // e.g. image/jepg or video/mp4
@@ -19,3 +19,8 @@ export type FriendProfileType = {
     display_name: string,
     avatar_url: string,
 };
+
+export type JWTType = {
+    id: number,
+    username: string,
+}

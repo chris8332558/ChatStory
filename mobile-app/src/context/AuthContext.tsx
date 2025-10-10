@@ -5,17 +5,32 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import apiClient from '../api/client'; // axios instance configured with baseURL and interceptor
+import { jwtDecode } from 'jwt-decode';
+import { JWTType } from '../../../shared/types';
 
 const TOEKN_KEY = 'userToken';
 
+interface AuthContextType {
+  userToken: string | null;
+  user: JWTType | null; // The user can be of type User or null
+  isLoading: boolean;
+  login: (_email: string, _password: string) => Promise<void>;
+  logout: () => void;
+  register: (_username: string, _email: string, _password: string) => void;
+}
+
+
 // Think of this AuthContext as the address where the global auth data will live.
-const AuthContext = createContext({
+const AuthContext = createContext<AuthContextType>({
     userToken: null,
+    user: null,
     isLoading: true,
-    login: async (_email, _password) => {},
+    login: async (_email: string, _password: string) => {},
     logout: async () => {},
-    register: async (_username, _email, _password) => {},
+    register: async (_username: string, _email: string, _password: string) => {},
 });
+
+
 
 // Inside the AuthProvider, useState is used to create two important pieces of state:
 // userToken: This will hold the JWT you receive from your backend's /login endpoint. 
@@ -26,12 +41,31 @@ const AuthContext = createContext({
 // While this check is happening, isLoading will be true, allowing you to show a 
 // loading screen or spinner. Once you know whether a user is logged in or not, 
 // you'll set it to false.
-export const AuthProvider = ({ children }) => {
-    const [userToken, setUserToken] = useState(null);
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [userToken, setUserToken] = useState<string | null>(null);
+    const [user, setUser] = useState<JWTType | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => { console.log('AuthContext: token changed:', !!userToken); }, [userToken]);
     useEffect(() => { console.log('AuthContext: UserToken now is:', userToken); }, [userToken]);
+
+    const setupAuth = (token: string) => {
+        if (token) {
+            const decodedToken: { user: JWTType } = jwtDecode(token);
+            // The `user` object from your backend's JWT payload might have a nested structure
+            const userData = decodedToken.user; 
+            console.log(`AuthContext.js: decode jwt user.id=${userData.id}, user.username=${userData.username}`);
+            setUser({
+                id: userData.id, // Match the 'id' field from your backend JWT payload
+                username: userData.username,
+                // Add any other fields you need, like email or roles
+            });
+            setUserToken(token);
+        } else {
+            setUser(null);
+            setUserToken(null);
+        }
+    }
 
     // Load token on app start (restore session)
     useEffect(() => {
@@ -40,7 +74,8 @@ export const AuthProvider = ({ children }) => {
             try {
                 const storedToken = await SecureStore.getItemAsync(TOEKN_KEY);
                 if (storedToken) {
-                    setUserToken(storedToken); // This should trigger re-render of index.js
+                    // setUserToken(storedToken); // This should trigger re-render of index.js
+                    setupAuth(storedToken);
                 }
             } catch (err) {
                 console.warn('Failed to restore token', err);
@@ -53,7 +88,7 @@ export const AuthProvider = ({ children }) => {
 
     // Login: call backend, get the token and store it SecureStore, update user token
     // useCallback will prevent the child component to be re-rendered if the dependencies didn't change
-    const login = useCallback(async (email, password) => {
+    const login = useCallback(async (email: string, password: string) => {
         if (!email || !password) {
             throw new Error('Email and password are required.');
         }
@@ -69,7 +104,7 @@ export const AuthProvider = ({ children }) => {
             await SecureStore.setItemAsync(TOEKN_KEY, token);
             setUserToken(token); // This should trigger re-render of index.js
             console.log(`AuthContext.login: Successfully setUserToken(${token})`);
-        } catch (err) {
+        } catch (err: any) {
             const message = err?.response?.data?.message || err?.message || 'Unable to log in. Please try again.';
             throw new Error(message);
         } finally {
@@ -94,7 +129,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     // Register
-    const register = useCallback(async (username, email, password) => {
+    const register = useCallback(async (username: string, email: string, password: string) => {
         if (!username || !email || !password) {
             throw new Error('Username, email, and password are required');
         }
@@ -111,7 +146,7 @@ export const AuthProvider = ({ children }) => {
 
             await SecureStore.setItemAsync(TOEKN_KEY, token);
             setUserToken(token);
-        } catch (err) {
+        } catch (err: any) {
             const message = err?.response?.data?.message || err?.message || 'Unable to register. Please try again.';
             throw new Error(message);
         } finally {
@@ -120,7 +155,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ userToken, isLoading, login, logout, register }}>
+        <AuthContext.Provider value={{ userToken , user, isLoading, login, logout, register }}>
             {children}
         </AuthContext.Provider>
     )

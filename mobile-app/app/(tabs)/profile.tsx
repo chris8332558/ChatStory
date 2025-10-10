@@ -154,22 +154,18 @@ export default function ProfileScreen() {
     const renderActiveThumb = ({ item } : { item: StoryType }) => {
         const thumbSource = item.thumbnail_url ? { uri: item.thumbnail_url } : { uri: item.media_url}
         return (
-            <View style={styles.activeCell}>
-                <TouchableOpacity onPress={() => router.push(`../profile/story/${item._id}`)} style={styles.storyThumb}>
+                <TouchableOpacity onPress={() => router.push(`../profile/story/${item._id}`)} style={styles.activeCell}>
                     <Image source={thumbSource} style={styles.storyThumb} />
                 </TouchableOpacity>
-            </View>
         );
     };
 
     const renderArchiveThumb = ({ item } : { item: StoryType }) => {
         const thumbSource = item.thumbnail_url ? { uri: item.thumbnail_url } : { uri: item.media_url}
         return (
-            <View style={styles.archiveCell}>
-                <TouchableOpacity onPress={() => router.push(`../profile/story/${item._id}`)} style={styles.storyThumb}>
+                <TouchableOpacity onPress={() => router.push(`../profile/story/${item._id}`)} style={styles.archiveCell}>
                     <Image source={thumbSource} style={styles.storyThumb} />
                 </TouchableOpacity>
-            </View>
         );
     };
 
@@ -268,5 +264,5 @@ const styles = StyleSheet.create({
     section: { fontWeight: '700', marginTop: 12, marginBottom: 12, },
     activeCell: { height: 100, aspectRatio: 1, padding: 1, },
     archiveCell: { width: '33.33%', aspectRatio: 1, padding: 1 },
-    storyThumb: { flex: 1, backgroundColor: '#e5e7eb'},
+    storyThumb: { flex: 1, borderRadius: 8, backgroundColor: '#e5e7eb'},
 });
